@@ -6,7 +6,7 @@ namespace Tired
     {
         static void Main(string[] args)
         {
-            Console.Write("Введите сообщение, которое будет повторяться");
+            Console.Write("Введите сообщение, которое будет повторяться\n");
             string message = Console.ReadLine();
 
             Console.Write("Сколько раз повторять сообщение?\n(Введите значение)");
