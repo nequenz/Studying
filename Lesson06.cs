@@ -19,7 +19,6 @@ namespace Tired
             string userSalary = Console.ReadLine();
 
             Console.WriteLine("Вас зовут "+ userName + ", мне "+ userAge + ", я работаю на/в "+ userJob + ", и моя зарплата "+ userSalary);
-
         }
     }
 }
