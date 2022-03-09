@@ -18,8 +18,6 @@ namespace Tired
 
             oldersCountInQueue = Convert.ToInt32(Console.ReadLine());
 
-            if (oldersCountInQueue == 0) return;
-
             commonTimeToWait = (minutesPerPerson * oldersCountInQueue);
 
             int TimeToWaitInMinutes = commonTimeToWait % нour;
