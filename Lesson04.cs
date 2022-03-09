@@ -69,16 +69,6 @@ namespace Tired
 
             Console.ReadLine();
 
-            /*
-            if(dealPrice > currentGoldCount)
-            {
-
-                Console.WriteLine("К сожалению у вас не хватает золота на покупку!");
-
-                return;
-            }
-            */
-
             currentGoldCount = currentGoldCount - dealPrice;
 
             currentCrystalsCount += crystalsToBuy;
