@@ -65,10 +65,11 @@ namespace Tired
 
             int dealPrice = crystalsToBuy * crystalPrice;
 
-            Console.WriteLine("Вы отдате " + dealPrice + " золота за " + crystalsToBuy + ", совершить сделку?\n(У вас не выбора, нажмите что нибудь)");
+            Console.WriteLine("Вы отдатите " + dealPrice + " золота за " + crystalsToBuy + ", совершить сделку?\n(Нажмите что нибудь)");
 
             Console.ReadLine();
 
+            /*
             if(dealPrice > currentGoldCount)
             {
 
@@ -76,7 +77,7 @@ namespace Tired
 
                 return;
             }
-        
+            */
 
             currentGoldCount = currentGoldCount - dealPrice;
 
