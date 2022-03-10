@@ -25,7 +25,7 @@ namespace Tired
                 }
             }
 
-            Console.WriteLine("Сумма кратных 3 или 5 рандомов равна:" + accumulatedNumber);
+            Console.WriteLine("Сумма равна:" + accumulatedNumber);
         }
     }
 }
