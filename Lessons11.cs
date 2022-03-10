@@ -6,7 +6,6 @@ namespace Tired
     {
         static void Main(string[] args)
         {
-           
             const int MaxRandomBound = 100;
             const int MaxLoopRepeats = 50;
             int accumulatedNumber = 0;
