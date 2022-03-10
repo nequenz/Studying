@@ -43,8 +43,7 @@ namespace Tired
                 Console.WriteLine("3. USD к RUB");
                 Console.WriteLine("4. USD к EUR");
                 Console.WriteLine("5. EUR к USD");
-                Console.WriteLine("6. EUR к RUB\n");
-                
+                Console.WriteLine("6. EUR к RUB\n");                
 
                 numberToRead = Convert.ToInt32( Console.ReadLine() );
 
