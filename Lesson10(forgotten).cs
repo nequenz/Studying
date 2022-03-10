@@ -8,13 +8,13 @@ namespace Tired
         {
             string name = "Jojin";
             string surname = "Mojo";
-            string swap = "";
+            string temporaryName = "";
 
             Console.WriteLine("Имя:"+ name+"\nФамилия:"+ surname);
 
-            swap = name;
+            temporaryName = name;
             name = surname;
-            surname = swap;
+            surname = temporaryName;
 
             Console.WriteLine("Имя:" + name + "\nФамилия:" + surname);
         }
