@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 
 namespace Tired
 {
@@ -8,14 +8,8 @@ namespace Tired
         {
             const int MaxAccumulatedValue = 100;
             const int AccumulatorValue = 7;
-            int accumulatedValue = 0;
 
-            for(int i=1;i<=(MaxAccumulatedValue/AccumulatorValue); i++)
-            {
-                accumulatedValue = AccumulatorValue * i;
-
-                Console.WriteLine("Вывод:" + accumulatedValue);
-            }
+            for (int i = AccumulatorValue; i <= MaxAccumulatedValue; i+= AccumulatorValue) Console.WriteLine("Вывод:" + i);
 
             Console.WriteLine("Работа окончена");
         }
