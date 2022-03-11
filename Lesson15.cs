@@ -10,22 +10,21 @@ namespace Tired
             const string SecretMessage = "Hash-functions are crying nearby:'(";
             const int MaxTryCount = 3;
 
-            int currentTry = 0;
             string passwordToEnter = "";
 
-            while(currentTry < MaxTryCount)
+            for(int i=0;i< MaxTryCount; i++)
             {
                 Console.Write("Введите пароль:");
                 passwordToEnter = Console.ReadLine();
 
-                if( passwordToEnter == Password)
+                if (passwordToEnter == Password)
                 {
                     Console.WriteLine(SecretMessage);
                     break;
                 }
 
-                currentTry++;
-                Console.WriteLine("У вас осталось "+(MaxTryCount - currentTry)+" попыток");
+                int leftAttempts = MaxTryCount - i;
+                Console.WriteLine("У вас осталось " + leftAttempts + " попыток");
             }
         }
     }
