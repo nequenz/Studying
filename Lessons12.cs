@@ -21,7 +21,7 @@ namespace Tired
 
             Console.WriteLine("Введите команду для выполнения\n(Команды для выполнения)");
             Console.WriteLine("exit - выход");
-            Console.WriteLine("get_random_value - вывести случайное значение от 0 до 1000");
+            Console.WriteLine("get_random_value - вывести случайное значение от "+ MinRandomBound +" до " + MaxRandomBound);
             Console.WriteLine("sum_values - суммировать два значения");
             Console.WriteLine("get_date - вывести текущую дату");
             Console.WriteLine("search_char - найти набранный символ в строке");
