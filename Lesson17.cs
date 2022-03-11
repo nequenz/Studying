@@ -20,7 +20,6 @@ namespace Tired
                 if (isCurrentValueLessMinExpOf2 == true)
                 {
                     Console.WriteLine("Случайное число "+ currentValue + "\nМинимальная степень составляет: "+i+"\nРезультативное значение:"+ minValueExp);
-                    
                     break;
                 }
 
