@@ -14,6 +14,10 @@ namespace Tired
             const string WordToGetCurrentDate = "get_date";
             const string WordToSearchChar = "search_char";
             const string WordToPlayLine = "play_line";
+            const int MinRandomBound = 0;
+            const int MaxRandomBound = 1001;
+            const int PlayLineLength = 15;
+            const int PlayLineSpeed = 200;
 
             Console.WriteLine("Введите команду для выполнения\n(Команды для выполнения)");
             Console.WriteLine("exit - выход");
@@ -36,7 +40,7 @@ namespace Tired
                 switch (wordToRead)
                 {
                     case WordToGetRandomValue:
-                        Console.WriteLine("Случайное значение:" + new Random().Next(0,1001));
+                        Console.WriteLine("Случайное значение:" + new Random().Next(MinRandomBound,MaxRandomBound));
                         break;
 
                     case WordToSumPairs:
@@ -64,9 +68,9 @@ namespace Tired
 
                         int foundCharCount = 0;
 
-                        foreach(char C in stringArgumentArg)
+                        foreach(char gottenChar in stringArgumentArg)
                         {
-                            if (C == charArgument)
+                            if (gottenChar == charArgument)
                             {
                                 foundCharCount++;
                             }
@@ -76,9 +80,9 @@ namespace Tired
                         break;
 
                     case WordToPlayLine:
-                        for(int i = 0; i < 15; i++)
+                        for(int i = 0; i < PlaiLineLength; i++)
                         {
-                            System.Threading.Thread.Sleep(200);
+                            System.Threading.Thread.Sleep(PlayLineSpeed);
                             Console.Write("#");
                         }
                         break;
