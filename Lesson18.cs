@@ -6,9 +6,9 @@ namespace Tired
     {
         static void Main(string[] args)
         {
-            string scopesLine = "";
             const char OpenedScope = '(';
             const char ClosedScope = ')';
+            string scopesLine = "";
             int scopeValidCount = 0;
             int maxScopeDeepLevel = 0;
 
