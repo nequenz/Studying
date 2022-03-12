@@ -21,7 +21,9 @@ namespace Tired
                 {
                     scopeValidCount++;
 
-                    if (scopeValidCount > maxScopeDeepLevel)
+                    bool isValidCountHigherDeepLevel = (scopeValidCount > maxScopeDeepLevel);
+
+                    if (isValidCountHigherDeepLevel == true)
                     {
                         maxScopeDeepLevel = scopeValidCount;
                     }
@@ -34,7 +36,6 @@ namespace Tired
 
                 if (scopeValidCount < 0)
                 {
-                    Console.WriteLine("Выражение некорректно, так как начинается с ')'");
                     break;
                 }
             }
