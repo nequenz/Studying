@@ -17,6 +17,8 @@ namespace Tired
             const int BossThinkTime = 500;
             const int MaxBossThinkCount = 5;
             const int MaxBossHealth = 600;
+            const int MinBossDamage = 50;
+            const int MaxBossDamage = 150;
             int bossHealth = MaxBossHealth;
             int bossDamage = 0;
             bool isBossStunned = false;
@@ -281,7 +283,7 @@ namespace Tired
                                 Console.Write(".");
                             }
 
-                            bossDamage = new Random().Next(50, 150);
+                            bossDamage = new Random().Next(MinBossDamage, MaxBossDamage);
 
                             Console.WriteLine("\nБосс наносит " + bossDamage + " ед. урона по вам!");
                         }
@@ -295,19 +297,17 @@ namespace Tired
                 currentGameMove++;
             }
 
-            if(isBossDead == true)
-            {
-                Console.WriteLine("Поздравляю! Вы убили босса");
-            }
-
-            if(isPlayerDead == true)
-            {
-                Console.WriteLine("Вы погибли! Потрачено...");
-            }
-
-            if(isPlayerDead == true && isBossDead == true)
+            if(isBossDead == true && isPlayerDead == true)
             {
                 Console.WriteLine("Взаимная смерть...");
+            }
+            else if(isBossDead == true)
+            {
+                Console.WriteLine("Вы убили босса!");
+            }
+            else if(isPlayerDead == true)
+            {
+                Console.WriteLine("Вы погибли! Потрачено...");
             }
 
             Console.WriteLine("\nИгра окончена!");
