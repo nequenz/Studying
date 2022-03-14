@@ -18,7 +18,7 @@ namespace Tired
             {
                 matrix[i] = new Random().Next(MinRandomValue,MaxRandomValue);
 
-                if(i % OutputRowDivNumber ==0)
+                if(i % OutputRowDivNumber == 0)
                 {
                     Console.WriteLine();
                 }
