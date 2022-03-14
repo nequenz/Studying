@@ -21,7 +21,11 @@ namespace Tired
             for(int i = 0; i < RowSize; i++)
             {
                 rowSum += matrix[currentRowToSum, i];
-                columnMul *= matrix[i,currentColumnToMul];
+            }
+
+            for(int i = 0; i < ColumnSize; i++)
+            {
+                columnMul *= matrix[i, currentColumnToMul];
             }
 
             for (int i = 0; i < ColumnSize; i++)
