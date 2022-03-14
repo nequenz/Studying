@@ -38,23 +38,11 @@ namespace Tired
             {
                 int nextElement = i + 1;
                 int prevElement = i - 1;
-                int localMax = 0;
 
-                if (rowArray[prevElement] > rowArray[i])
+                if( (rowArray[i] > rowArray[prevElement]) && (rowArray[i] > rowArray[nextElement]) )
                 {
-                    localMax = rowArray[prevElement];
+                    Console.WriteLine("Локальный максимум:" + rowArray[i]);
                 }
-                else
-                {
-                    localMax = rowArray[i];
-                }
-
-                if (localMax < rowArray[nextElement])
-                {
-                    localMax = rowArray[nextElement];
-                }
-
-                Console.WriteLine("Локальный максимум:" + localMax);
             }
 
             if (rowArray[RowTopElementIndex] > rowArray[RowTopElementIndex - 1])
