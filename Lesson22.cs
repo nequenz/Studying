@@ -10,62 +10,56 @@ namespace Tired
             const int RowSize = 30;
             const int MinRandomValue = 10;
             const int MaxRandomValue = 100;
-            int[] matrix = new int[RowSize];
+            const int RowTopElementIndex = RowSize - 1;
+            int[] rowArray = new int[RowSize];
 
             Console.WriteLine("Исходная матрица");
 
             for (int i = 0; i < RowSize; i++)
             {
-                matrix[i] = new Random().Next(MinRandomValue,MaxRandomValue);
+                rowArray[i] = new Random().Next(MinRandomValue, MaxRandomValue);
 
-                if(i % OutputRowDivNumber == 0)
+                if (i % OutputRowDivNumber == 0)
                 {
                     Console.WriteLine();
                 }
 
-                Console.Write(matrix[i]+",");
+                Console.Write(rowArray[i] + ",");
             }
 
             Console.WriteLine("\n");
 
-            for (int i = 0; i < RowSize; i++)
+            if (rowArray[0] > rowArray[1])
+            {
+                Console.WriteLine("Локальный максимум крайнего элемента:" + rowArray[0]);
+            }
+
+            for (int i = 1; i < RowTopElementIndex; i++)
             {
                 int nextElement = i + 1;
                 int prevElement = i - 1;
                 int localMax = 0;
 
-                if ( i == 0 )
+                if (rowArray[prevElement] > rowArray[i])
                 {
-                    if (matrix[i] > matrix[nextElement])
-                    {
-                        Console.WriteLine("Локальный максимум крайнего элемента:"+ matrix[i]);
-                    }
-                }
-                else if( i == RowSize - 1)
-                {
-                    if (matrix[i] > matrix[prevElement])
-                    {
-                        Console.WriteLine("Локальный максимум крайнего элемента:" + matrix[i]);
-                    }
+                    localMax = rowArray[prevElement];
                 }
                 else
                 {
-                    if(matrix[prevElement] > matrix[i])
-                    {
-                        localMax = matrix[prevElement];
-                    }
-                    else
-                    {
-                        localMax = matrix[i];
-                    }
-
-                    if(localMax < matrix[nextElement])
-                    {
-                        localMax = matrix[nextElement];
-                    }
-
-                    Console.WriteLine("Локальный максимум:" + localMax);
+                    localMax = rowArray[i];
                 }
+
+                if (localMax < rowArray[nextElement])
+                {
+                    localMax = rowArray[nextElement];
+                }
+
+                Console.WriteLine("Локальный максимум:" + localMax);
+            }
+
+            if (rowArray[RowTopElementIndex] > rowArray[RowTopElementIndex - 1])
+            {
+                Console.WriteLine("Локальный максимум крайнего элемента:" + rowArray[RowTopElementIndex]);
             }
         }
     }
