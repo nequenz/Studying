@@ -17,7 +17,6 @@ namespace Tired
             int savedValueRepeatCount = 1;
 
             int[] valueArray = new int[ValueArraySize];
-            int[] arrayOfSameValues;
 
             Console.WriteLine("Исходный массив:");
 
@@ -60,15 +59,6 @@ namespace Tired
             }
 
             Console.Write("\n\nЧисло " + maxSameValue + " повторилось " + maxSameValueRepeats + " раз и является наибольшим локальный массивом\nРезультативный массив:");
-
-            arrayOfSameValues = new int[maxSameValueRepeats];
-
-            for (int i = 0; i < maxSameValueRepeats; i++)
-            {
-                arrayOfSameValues[i] = maxSameValue;
-
-                Console.Write(arrayOfSameValues[i]+" ");
-            }
         }
     }
 }
