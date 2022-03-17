@@ -58,7 +58,7 @@ namespace Tired
                 }
             }
 
-            Console.Write("\n\nЧисло " + maxSameValue + " повторилось " + maxSameValueRepeats + " раз и является наибольшим локальный массивом\nРезультативный массив:");
+            Console.Write("\n\nЧисло " + maxSameValue + " повторилось " + maxSameValueRepeats + " раз и является наибольшим локальный массивом");
         }
     }
 }
