@@ -6,15 +6,15 @@ namespace Tired
     {
         static void Main(string[] args)
         {
-            const int rowSize = 20;
+            const int RowSize = 20;
             const int MinRandomBound = 10;
             const int MaxRandomBound = 99;
 
-            int[] row = new int[rowSize];
+            int[] row = new int[RowSize];
 
             Console.WriteLine("Исходный массив:");
 
-            for (int i = 0; i < rowSize; i++)
+            for (int i = 0; i < RowSize; i++)
             {
                 row[i] = new Random().Next(MinRandomBound, MaxRandomBound);
 
@@ -23,12 +23,12 @@ namespace Tired
 
             Console.WriteLine();
 
-            for (int i = 0; i < rowSize; i++)
+            for (int i = 0; i < RowSize; i++)
             {
                 int savedMinElement;
                 int minElement = i;
 
-                for (int k = i; k < rowSize; k++)
+                for (int k = i; k < RowSize; k++)
                 {
                     int currentValue = row[k];
 
@@ -46,7 +46,7 @@ namespace Tired
 
             Console.WriteLine("\nОтсортированный массив:");
 
-            for (int i = 0; i < rowSize; i++)
+            for (int i = 0; i < RowSize; i++)
             {
                 Console.Write(row[i] + " ");
             }
