@@ -9,7 +9,7 @@ namespace Tired
             DrawBar(100, 30, 10, 3);
         }
 
-        private static void DrawBar(int maxValue, int currentValue, int posX, int posY)
+        private static void DrawBar(int maxValue, int currentValue, int posX = 0, int posY = 0)
         {
             const int BarSize = 10;
             int barCellsCount = maxValue / BarSize;
