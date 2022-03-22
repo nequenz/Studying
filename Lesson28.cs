@@ -6,28 +6,41 @@ namespace Tired
     {
         static void Main(string[] args)
         {
-            string[] personRecords = null;
-            string[] personPositions = {"Капитан","Кассир","Менеджер","Разработчик","Художник","Грузчик","Логист"};
+            string[] fullnamesRecords = null;
+            string[] positionsRecords = null;
 
-            AddDossier(personRecords, "");
+
         }
 
-        private static void AddDossier(string[] personRecords,string record)
+        private static void AddDossier(string fullnameRecord, string positionRecord)
         {
-            int newLength = personRecords.Length + 1;
-            string[] newRecords = new string[newLength];
 
-            for(int i = 0; i < personRecords.Length; i++)
+        }
+
+        private static void AddValueToArray(string[] currentArray,string record)
+        {
+            ExtendStringArray(currentArray);
+
+            currentArray[currentArray.Length - 1] = record;
+        }
+
+        private static void ExtendStringArray(string[] currentArray)
+        {
+            string[] newArray;
+            
+            if(currentArray == null)
             {
-                newRecords[i] = personRecords[i];
+                currentArray = new string[1];
+
+                return;
             }
 
-            newRecords[newLength - 1] = record;
-        }
+            newArray = new string[currentArray.Length + 1];
 
-        private static void GetByName(string name)
-        {
-
+            for(int i = 0; i < currentArray.Length; i++) 
+            {
+                newArray[i] = currentArray[i];
+            }
         }
     }
 }
