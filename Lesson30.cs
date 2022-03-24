@@ -7,7 +7,7 @@ namespace Tired
         static void Main(string[] args)
         {
             int convertedValue = 0;
-
+            
             ConvertToInt(out convertedValue);
         }
 
