@@ -6,19 +6,23 @@ namespace Tired
     {
         static void Main(string[] args)
         {
-            int convertedValue = 0;
-            
-            ConvertToInt(out convertedValue);
+            int convertedValue = GetIntValueByReadline();
+
+            Console.WriteLine("Значение:" + convertedValue);
         }
 
-        private static void ConvertToInt(out int outValue)
+        private static int GetIntValueByReadline()
         {
+            int result = 0;
+
             Console.Write("Ввод:");
 
-            while( int.TryParse( Console.ReadLine(), out outValue) == false )
+            while (int.TryParse(Console.ReadLine(), out result) == false)
             {
                 Console.Write("Значение не конвертировано, попробуйте еще раз\nВвод:");
             }
+
+            return result;
         }
     }
 }
