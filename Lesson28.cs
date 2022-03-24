@@ -30,58 +30,72 @@ namespace Tired
                 switch (word)
                 {
                     case AddWord:
-                        string fullnamePerson;
-                        string positionPerson;
-
-                        Console.Write("Введите ФИО:");
-                        fullnamePerson = Console.ReadLine();
-                        Console.Write("Введите Должность:");
-                        positionPerson = Console.ReadLine();
-
-                        AddDossier(ref fullnamesRecords, ref positionsRecords, fullnamePerson, positionPerson);
-                        Console.WriteLine("Запись добавлена.");
+                        AddDossierByUserInput(fullnamesRecords,positionsRecords);
                         break;
 
                     case RemoveWord:
-                        int indexToRemove;
-                        bool isRemovingSuccess;
-
-                        Console.Write("Введите индекс для удаления записи:");
-                        indexToRemove = Convert.ToInt32( Console.ReadLine() );
-                        isRemovingSuccess = RemoveDossierByIndex(ref fullnamesRecords, ref positionsRecords, indexToRemove);
-
-                        if(isRemovingSuccess == true)
-                        {
-                            Console.WriteLine("\nУдаление прошло успешно!");
-                        }
-                        else
-                        {
-                            Console.WriteLine("\nОшибка! Запись не была удалена.");
-                        }
-
+                        RemoveDossierByUserInput(fullnamesRecords, positionsRecords);
                         break;
 
                     case ShowAllWord:
-                        WriteAllDossiers(ref fullnamesRecords, ref positionsRecords);
+                        WriteAllDossiers(fullnamesRecords, positionsRecords);
                         break;
 
                     case SearchWord:
-                        string surname;
-
-                        Console.Write("Введите фамилию для поиска досье:");
-                        surname = Console.ReadLine();
-
-                        SearchDossierIndexBySurname(ref fullnamesRecords, ref positionsRecords,surname);
+                        SearchDossierByUserInput(fullnamesRecords, positionsRecords);
                         break;
                 }
             }
-
-
         }
 
-        private static void SearchDossierIndexBySurname(ref string[] fullnamesRecords, ref string[] positionRecords, string surname)
+        private static void SearchDossierByUserInput(string[] fullnamesRecords, string[] positionRecords)
         {
-            if (IsDossiersCorrect(ref fullnamesRecords, ref positionRecords, 0) == false)
+            string surname;
+
+            Console.Write("Введите фамилию для поиска досье:");
+            surname = Console.ReadLine();
+
+            SearchDossierBySurname(fullnamesRecords, positionRecords, surname);
+        }
+
+        private static void RemoveDossierByUserInput(string[] fullnamesRecords, string[] positionRecords)
+        {
+            int indexToRemove;
+            bool isRemovingSuccess;
+
+            Console.Write("Введите индекс для удаления записи:");
+
+            indexToRemove = Convert.ToInt32(Console.ReadLine());
+            isRemovingSuccess = RemoveDossierByIndex(fullnamesRecords, positionRecords, indexToRemove);
+
+            if (isRemovingSuccess == true)
+            {
+                Console.WriteLine("\nУдаление прошло успешно!");
+            }
+            else
+            {
+                Console.WriteLine("\nОшибка! Запись не была удалена.");
+            }
+        }
+
+        private static void AddDossierByUserInput(string[] fullnamesRecords, string[] positionRecords)
+        {
+            string fullnamePerson;
+            string positionPerson;
+
+            Console.Write("Введите ФИО:");
+            fullnamePerson = Console.ReadLine();
+
+            Console.Write("Введите Должность:");
+            positionPerson = Console.ReadLine();
+
+            AddDossier(ref fullnamesRecords, ref positionRecords, fullnamePerson, positionPerson);
+            Console.WriteLine("Запись добавлена.");
+        }
+
+        private static void SearchDossierBySurname(string[] fullnamesRecords, string[] positionRecords, string surname)
+        {
+            if (IsDossiersCorrect(fullnamesRecords, positionRecords, 0) == false)
             {
                 Console.WriteLine("В базе досье присутствуют ошибки! Не могу найти что требуется.");
 
@@ -92,29 +106,31 @@ namespace Tired
             {
                 if( fullnamesRecords[i].Contains(surname) )
                 {
-                    WriteDossierByIndex(ref fullnamesRecords,ref positionRecords,i);
+                    WriteDossierByIndex(fullnamesRecords,positionRecords,i);
                 }
             }
         }
 
-        private static void WriteAllDossiers(ref string[] fullnamesRecords, ref string[] positionRecords)
+        private static void WriteAllDossiers(string[] fullnamesRecords, string[] positionRecords)
         {
-            if (IsDossiersCorrect(ref fullnamesRecords, ref positionRecords, 0) == false)
+
+            if (IsDossiersCorrect(fullnamesRecords, positionRecords, 0) == false)
             {
                 Console.WriteLine("В базе досье присутствуют ошибки! Не могу ничего вывести.");
 
                 return;
             }
+           
 
             for (int i = 0; i < fullnamesRecords.Length; i++)
             {
-                WriteDossierByIndex(ref fullnamesRecords, ref positionRecords,i);
+                WriteDossierByIndex(fullnamesRecords, positionRecords,i);
             }
         }
 
-        private static void WriteDossierByIndex(ref string[] fullnamesRecords, ref string[] positionRecords, int index)
+        private static void WriteDossierByIndex(string[] fullnamesRecords, string[] positionRecords, int index)
         {
-            if(IsDossiersCorrect(ref fullnamesRecords,ref positionRecords, index) == false)
+            if(IsDossiersCorrect(fullnamesRecords,positionRecords, index) == false)
             {
                 return;
             }
@@ -122,19 +138,18 @@ namespace Tired
             Console.WriteLine("[" + index + "] " + fullnamesRecords[index] + " - " + positionRecords[index]);
         }
 
-
         private static void AddDossier(ref string[] fullnamesRecords, ref string[] positionRecords, string fullnameRecord, string positionRecord)
         {
             AddValueToArray(ref fullnamesRecords,fullnameRecord);
             AddValueToArray(ref positionRecords,positionRecord);
         }
 
-        private static bool RemoveDossierByIndex(ref string[] fullnamesRecords,ref string[] positionRecords,int index)
+        private static bool RemoveDossierByIndex(string[] fullnamesRecords,string[] positionRecords,int index)
         {
             return ( DeleteValueFromArrayByIndex(ref fullnamesRecords, index) && DeleteValueFromArrayByIndex(ref positionRecords, index) );
         }
 
-        private static bool IsDossiersCorrect(ref string[] fullnamesRecords, ref string[] positionRecords,int index)
+        private static bool IsDossiersCorrect(string[] fullnamesRecords, string[] positionRecords,int index)
         {
             if (fullnamesRecords != null && positionRecords != null)
             {
