@@ -30,11 +30,11 @@ namespace Tired
                 switch (word)
                 {
                     case AddWord:
-                        AddDossierByUserInput(fullnamesRecords,positionsRecords);
+                        AddDossierByUserInput(ref fullnamesRecords,ref positionsRecords);
                         break;
 
                     case RemoveWord:
-                        RemoveDossierByUserInput(fullnamesRecords, positionsRecords);
+                        RemoveDossierByUserInput(ref fullnamesRecords, ref positionsRecords);
                         break;
 
                     case ShowAllWord:
@@ -58,7 +58,7 @@ namespace Tired
             SearchDossierBySurname(fullnamesRecords, positionRecords, surname);
         }
 
-        private static void RemoveDossierByUserInput(string[] fullnamesRecords, string[] positionRecords)
+        private static void RemoveDossierByUserInput(ref string[] fullnamesRecords, ref string[] positionRecords)
         {
             int indexToRemove;
             bool isRemovingSuccess;
@@ -66,7 +66,7 @@ namespace Tired
             Console.Write("Введите индекс для удаления записи:");
 
             indexToRemove = Convert.ToInt32(Console.ReadLine());
-            isRemovingSuccess = RemoveDossierByIndex(fullnamesRecords, positionRecords, indexToRemove);
+            isRemovingSuccess = RemoveDossierByIndex(ref fullnamesRecords, ref positionRecords, indexToRemove);
 
             if (isRemovingSuccess == true)
             {
@@ -78,7 +78,7 @@ namespace Tired
             }
         }
 
-        private static void AddDossierByUserInput(string[] fullnamesRecords, string[] positionRecords)
+        private static void AddDossierByUserInput(ref string[] fullnamesRecords, ref string[] positionRecords)
         {
             string fullnamePerson;
             string positionPerson;
@@ -144,7 +144,7 @@ namespace Tired
             AddValueToArray(ref positionRecords,positionRecord);
         }
 
-        private static bool RemoveDossierByIndex(string[] fullnamesRecords,string[] positionRecords,int index)
+        private static bool RemoveDossierByIndex(ref string[] fullnamesRecords,ref string[] positionRecords,int index)
         {
             return ( DeleteValueFromArrayByIndex(ref fullnamesRecords, index) && DeleteValueFromArrayByIndex(ref positionRecords, index) );
         }
