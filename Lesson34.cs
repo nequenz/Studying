@@ -7,25 +7,25 @@ namespace Tired
     {
         static void Main(string[] args)
         {
-            Queue<int> clientPurchaseAmounts = new Queue<int>();
             int myAccount = 0;
-
+            Queue<int> clientPurchaseAmounts = new Queue<int>();
+  
             AddRandomPurchaseAmounts(clientPurchaseAmounts,15);
-            WriteStatusOfQueue(clientPurchaseAmounts);
-
-            Console.WriteLine();
 
             while(clientPurchaseAmounts.Count > 0)
             {
+                WriteStatusOfQueue(clientPurchaseAmounts);
+
                 int currentPurchase = clientPurchaseAmounts.Dequeue();
 
+                Console.WriteLine("\nНа вашем счету:" + myAccount + " Р");
                 Console.WriteLine("\nОбслуживание клиента с суммой покупки " + currentPurchase + " Р");
                 Console.WriteLine("Нажмите любую клавишу для обслуживания...");
                 Console.ReadKey(true);
 
                 myAccount += currentPurchase;
 
-                Console.WriteLine("На вашем счету:"+ myAccount +" Р");
+                Console.Clear();
             }
         }
 
