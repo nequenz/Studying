@@ -27,19 +27,14 @@ namespace Tired
                 {
                     Console.WriteLine("Сумма всего списка равна:" + SumList(numberList));
                 }
+                else if(Int32.TryParse(currentWord, out int parsedValue) == true)
+                {
+                    numberList.Add(parsedValue);
+                    Console.WriteLine("Значение добавлено!");
+                }
                 else
                 {
-                    bool IsParsed = Int32.TryParse(currentWord, out int parsedValue);
-
-                    if(IsParsed == true)
-                    {
-                        numberList.Add(parsedValue);
-                        Console.WriteLine("Значение добавлено!");
-                    }
-                    else
-                    {
-                        Console.WriteLine("Не удалось добавить значение!");
-                    }
+                    Console.WriteLine("Не удалось добавить значение!");
                 }
             }
         }
