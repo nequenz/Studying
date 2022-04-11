@@ -80,7 +80,6 @@ namespace Tired
             const int FullnameIndex = 0;
             const int PositionIndex = 1;
 
-
             for(int i = 0; i < list.Count; i++)
             {
                 string[] dossierElement = list[i];
