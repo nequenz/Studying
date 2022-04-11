@@ -62,9 +62,9 @@ namespace Tired
         {
             Console.Write("Введите индекс для удаления записи:");
 
-            int removeIndex = Convert.ToInt32(Console.ReadLine());
+            bool isRemovingSuccess = Int32.TryParse(Console.ReadLine(),out int removeIndex);
 
-            if(removeIndex>=0 && removeIndex < list.Count)
+            if ( (isRemovingSuccess == true) && (removeIndex >= 0 && removeIndex < list.Count) )
             {
                 list.RemoveAt(removeIndex);
                 Console.WriteLine("\nУдаление прошло успешно!");
@@ -80,7 +80,7 @@ namespace Tired
             const int FullnameIndex = 0;
             const int PositionIndex = 1;
 
-            for(int i = 0; i < list.Count; i++)
+            for (int i = 0; i < list.Count; i++)
             {
                 string[] dossierElement = list[i];
 
