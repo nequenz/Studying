@@ -17,7 +17,24 @@ namespace Tired
     {
         public int positionX { get; private set; } = 0;
         public int positionY { get; private set; } = 0;
-        public char symbolSkin { get; set; } = '@';
+        public char symbolSkin
+        {
+            get => _symbolSkin;
+
+            set
+            {
+                if (value != '\0')
+                {
+                    _symbolSkin = value;
+                }
+                else
+                {
+                    _symbolSkin = '@';
+                }
+            }
+        }
+
+        private char _symbolSkin = '@';
 
         public Player(int positionX, int positionY)
         {
@@ -28,6 +45,8 @@ namespace Tired
 
     class Renderer
     {
+        private const int _MaxRenderWidth = 50;
+        private const int _MaxRenderHeight = 50;
         private Player _drawingPlayer = null;
 
         public Renderer(Player _player)
@@ -45,8 +64,11 @@ namespace Tired
 
         private void Draw(int positionX, int positionY, char symbol = '0')
         {
-            Console.SetCursorPosition(positionX, positionY);
-            Console.WriteLine(symbol);
+            if( (positionX>=0 && positionX<_MaxRenderWidth) && (positionY>=0 && positionY < _MaxRenderHeight) )
+            {
+                Console.SetCursorPosition(positionX, positionY);
+                Console.WriteLine(symbol);
+            }
         }
     }
 }
