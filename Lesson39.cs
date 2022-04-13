@@ -16,6 +16,7 @@ namespace Tired
     class Player
     {
         private char _symbolSkin = '@';
+        
         public int PositionX { get; private set; } = 0;
         public int PositionY { get; private set; } = 0;
         public char SymbolSkin
