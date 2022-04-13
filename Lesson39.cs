@@ -7,7 +7,7 @@ namespace Tired
         static void Main(string[] args)
         {
             Player mainPlayer = new Player(12,8);
-            Renderer currentRenderer = new Renderer(mainPlayer);
+            Renderer currentRenderer = new Renderer(50,50,mainPlayer);
 
             currentRenderer.DrawPlayer();
         }
@@ -15,9 +15,9 @@ namespace Tired
 
     class Player
     {
-        public int positionX { get; private set; } = 0;
-        public int positionY { get; private set; } = 0;
-        public char symbolSkin
+        public int PositionX { get; private set; } = 0;
+        public int PositionY { get; private set; } = 0;
+        public char SymbolSkin
         {
             get => _symbolSkin;
 
@@ -38,19 +38,21 @@ namespace Tired
 
         public Player(int positionX, int positionY)
         {
-            this.positionX = positionX;
-            this.positionY = positionY;
+            PositionX = positionX;
+            PositionY = positionY;
         }
     }
 
     class Renderer
     {
-        private const int _MaxRenderWidth = 50;
-        private const int _MaxRenderHeight = 50;
+        private readonly int MaxRenderViewWidth = 50;
+        private readonly int MaxRenderViewHeight = 50;
         private Player _drawingPlayer = null;
 
-        public Renderer(Player _player)
+        public Renderer(int maxRenderViewWidth, int maxRenderViewHeight,Player _player)
         {
+            MaxRenderViewWidth = maxRenderViewWidth;
+            MaxRenderViewHeight = maxRenderViewHeight;
             _drawingPlayer = _player;
         }
 
@@ -58,13 +60,13 @@ namespace Tired
         {
             if (_drawingPlayer != null)
             {
-                Draw(_drawingPlayer.positionX, _drawingPlayer.positionY, _drawingPlayer.symbolSkin);
+                Draw(_drawingPlayer.PositionX, _drawingPlayer.PositionY, _drawingPlayer.SymbolSkin);
             }
         }
 
         private void Draw(int positionX, int positionY, char symbol = '0')
         {
-            if( (positionX>=0 && positionX<_MaxRenderWidth) && (positionY>=0 && positionY < _MaxRenderHeight) )
+            if( (positionX>=0 && positionX<MaxRenderViewWidth) && (positionY>=0 && positionY < MaxRenderViewHeight) )
             {
                 Console.SetCursorPosition(positionX, positionY);
                 Console.WriteLine(symbol);
