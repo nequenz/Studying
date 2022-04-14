@@ -28,28 +28,22 @@ namespace Tired
     {
         public int Level { get; private set; }
         public string Name { get; private set; }
-        public bool IsBanned { get; set; } = false;
+        public bool IsBanned { get; private set; } = false;
 
         public Player(string name = "Unnamed", int level = 1)
         {
             Name = name;
             Level = level;
         }
+
+        public void SetBanMode(bool isBanned) => IsBanned = isBanned;
     }
         
     sealed class PlayerCollector : EntityCollector
     {
         public Player GetPlayerByID(int id) => GetEntityByID(id) as Player;
 
-        public void SetPlayerBanMode(int id,bool isBanned)
-        {
-            Player player = GetPlayerByID(id);
-
-            if (player != null)
-            {
-                player.IsBanned = isBanned;
-            }
-        }
+        public void SetPlayerBanMode(int id,bool isBanned) => GetPlayerByID(id)?.SetBanMode(isBanned);
     }
 
     abstract class CollectedEntity
