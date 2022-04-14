@@ -46,34 +46,14 @@ namespace Tired
         public void SetPlayerBanMode(int id,bool isBanned) => GetPlayerByID(id)?.SetBanMode(isBanned);
     }
 
-    abstract class CollectedEntity
+    class EntityCollector : ICollectorable
     {
-        private int _id = EntityCollector.EmptyID;
-
-        public int ID
-        {
-            get => _id;
-
-            set
-            {
-                if (_id == EntityCollector.EmptyID)
-                {
-                    _id = value;
-                }
-            }
-        }
-    }
-
-    class EntityCollector
-    {
-        public static readonly int EmptyID = -1;
-
         protected List<CollectedEntity> _entityList = new List<CollectedEntity>();
         private int _nextID = 0;
         
         public bool Add(CollectedEntity entity)
         {
-            if(entity !=null && entity.ID == EmptyID)
+            if(entity !=null && entity.ID == ICollectorable.EmptyID)
             {
                 entity.ID = _nextID;
                 _nextID++;
@@ -119,5 +99,36 @@ namespace Tired
                 Console.WriteLine("Объект типа "+entity.ToString()+" с ид "+entity.ID);
             }
         }
+    }
+
+    abstract class CollectedEntity 
+    {
+        private int _id = ICollectorable.EmptyID;
+
+        public int ID
+        {
+            get => _id;
+
+            set
+            {
+                if (_id == ICollectorable.EmptyID)
+                {
+                    _id = value;
+                }
+            }
+        }
+    }
+
+    interface ICollectorable
+    {
+        public static int EmptyID = -1;
+
+        public bool Add(CollectedEntity entity);
+
+        public bool RemoveByID(int id);
+
+        public CollectedEntity GetEntityByID(int id);
+
+        public void ShowEntities();
     }
 }
