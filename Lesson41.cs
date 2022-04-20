@@ -7,81 +7,259 @@ namespace Tired
     {
         static void Main(string[] args)
         {
-            Deck gameDeck = new Deck(24, new GameCardType[] {
-                GameCardType.Warrior,
-                GameCardType.Archer,
-                GameCardType.Wolf,
-                GameCardType.Priest
-            });
-
-            UserInputMenu menu = new UserInputMenu(gameDeck);
+            UserInputMenu menu = new UserInputMenu(new Deck(20));
 
             menu.Update();
+   
         }
     }
 
     class UserInputMenu
     {
         private const string WordToExit = "exit";
-        private const string WordToTakeCards = "take_range";
-        private const string WordToTakeCard = "take";
+        private const string WordToTake = "take";
+        private const string WordToTakeSome = "some";
 
-        private string _wordToInput = "";
-        private Deck _currentDeck;
+        private string _wordToRead;
+        private Deck _deck;
 
         public UserInputMenu(Deck deck)
         {
-            _currentDeck = deck;
+            _deck = deck;
         }
 
         public void Update()
         {
-            while (_currentDeck != null && _wordToInput != WordToExit)
+            while (_deck != null && _deck.AreAllCardsTaken() == false && _wordToRead != WordToExit)
             {
-                switch (_wordToInput)
+                Draw();
+                Console.Write("Ввод:");
+
+                _wordToRead = Console.ReadLine();
+
+                Console.WriteLine();
+
+                switch (_wordToRead)
                 {
                     case WordToExit:
                         break;
-                    case WordToTakeCards:
-                        TakeCardsByUserInput();
+
+                    case WordToTake:
+                        TakeCardByUser();
                         break;
+
+                    case WordToTakeSome:
+                        TakeCardsByUser();
+                        break;
+                }
+
+                Console.Clear();
+            }
+
+            _deck.ShowTakenCards();
+        }
+
+        public void TakeCardByUser()
+        {
+            Console.WriteLine("Введите X и Y позицию карты:");
+
+            if ( Int32.TryParse(Console.ReadLine(), out int positionX) && Int32.TryParse(Console.ReadLine(), out int positionY) )
+            {
+                _deck.TakeCardByPosition(positionX,positionY);
+            }
+            else
+            {
+                Console.Write("Ошибка ввода!");
+            }
+        }
+
+        public void TakeCardsByUser()
+        {
+            Console.Write("Введите количество карт:");
+
+            if (Int32.TryParse(Console.ReadLine(), out int count) )
+            {
+                _deck.TakeCards(count);
+            }
+            else
+            {
+                Console.Write("Ошибка ввода!");
+            }
+        }
+
+        public void DrawInfo()
+        {
+            Console.WriteLine("\nВведите take и по очередно номер карты по горизонтали, а потом по вертикали чтобы вытащить ее!");
+            Console.WriteLine("Введите some и количество карт чтобы вытащить случайные!\n");
+        }
+
+        public void Draw()
+        {
+            DrawInfo();
+            _deck.DrawCards();
+        }
+    }
+
+    class Deck
+    {
+        private const int LineWidth = 10;
+
+        private List<Card> _cards = new List<Card>();
+        private CardLocalization _cardLocalization = new CardLocalization();
+        
+        public Deck(int cardCount = LineWidth)
+        {
+            ResetCards(cardCount);
+            RandomizeCards();
+        }
+
+        public bool IsCorrectPosition(int positionX, int positionY)
+        {
+            bool isXCorrect = (positionX >= 0 && positionX < LineWidth);
+            bool isYCorrect = (positionY >= 0 && positionY < (_cards.Count/LineWidth) );
+
+            return isXCorrect & isYCorrect;
+        }
+
+        public void TakeCardByPosition(int positionX, int positionY)
+        {
+            positionX--;
+            positionY--;
+
+            if( IsCorrectPosition(positionX, positionY) )
+            {
+                Card card = _cards[positionY * LineWidth + positionX];
+
+                if(card.IsTakenByPlayer == false)
+                {
+                    card.TakeMe();
+
+                    return;
+                }
+                else
+                {
+                    Console.WriteLine("Эта карта уже ваша...\nПовторите выбор");
+                }
+            }
+
+            Console.WriteLine("Ошибка координат выбора карты");
+        }
+
+        public void TakeCards(int count)
+        {
+            count = count > GetCardsCount() == true ? GetCardsCount() : count;
+
+            for (int i=0; i < GetCardsCount(); i++)
+            {
+                if (count == 0)
+                {
+                    return;
+                }
+
+                Card card = _cards[i];
+
+                if(card.IsTakenByPlayer == false)
+                {
+                    card.TakeMe();
+                    count--;
                 }
             }
         }
 
-        private void TakeCardsByUserInput()
-        {
-            Console.Write("Введите количество карт, которое вы хотите вытащить:");
+        public int GetCardsCount() => _cards.Count;
 
-            if( Int32.TryParse(Console.ReadLine(), out int count) )
+        public int GetCardsCountWith(bool isTakenPlayer = false)
+        {
+            int count = 0;
+
+            foreach(Card card in _cards)
             {
-                _currentDeck.TakeCards(count);
+                if( card.IsTakenByPlayer == isTakenPlayer)
+                {
+                    count++;
+                }
             }
-            else
+
+            return count;
+        }
+
+        public bool AreAllCardsTaken() => (GetCardsCountWith(false) == 0);
+
+        public void ResetCards(int cardCount = LineWidth)
+        {
+            _cards.Clear();
+
+            if (cardCount < LineWidth)
             {
-                Console.Write("Ошибка ввода!");
+                cardCount = LineWidth;
+            }
+
+            for (int i = 0; i < cardCount; i++)
+            {
+                _cards.Add( new Card(CardType.Empty) );
             }
         }
 
-        private void TakeCardByUserInput()
+        public void RandomizeCards()
         {
-            Console.Write("Введите номер карты, который вы хотите вытащить (в колоде "+_currentDeck.GetCardsCount()+"карт):");
-
-            if (Int32.TryParse(Console.ReadLine(), out int number))
+            for(int i = 0; i < GetCardsCount(); i++)
             {
-                //_currentDeck.TakeCard(number);
-                
+                CardType randomType = (CardType)new Random().Next(0, (int)CardType.Top);
+
+                _cards[i]?.SetType(randomType);
             }
-            else
+        }
+
+        public void DrawCards()
+        {
+            int lineY = 1;
+
+            Console.Write("   ");
+
+            for(int i = 1; i <= LineWidth; i++)
             {
-                Console.Write("Ошибка ввода!");
+                Console.Write(i + "  ");
             }
 
+            for (int i = 0; i < GetCardsCount(); i++)
+            {
+                if ( (i % LineWidth == 0) && (i > 0) || (i == 0) )
+                {
+                    Console.WriteLine();
+                    Console.Write(lineY);
+
+                    lineY++;
+                }
+
+                if (_cards[i].IsTakenByPlayer == true)
+                {
+                    Console.Write("  0");
+                }
+                else
+                {
+                    Console.Write("  #");
+                }
+            }
+
+            Console.WriteLine();
+        }
+
+        public void ShowTakenCards()
+        {
+            Console.WriteLine("\nВаши карты:");
+
+            foreach(Card card in _cards)
+            {
+                if (card.IsTakenByPlayer == true)
+                {
+                    Console.WriteLine("Карта: " + _cardLocalization.GetCardInfoByType(card.Type));
+                }
+            }
         }
 
     }
 
-    enum GameCardType
+    enum CardType
     {
         Empty,
         Mage,
@@ -93,102 +271,48 @@ namespace Tired
         Priest,
         Rogue,
         Shaman,
-        Count
+        Top
     }
 
-    sealed class Card
+    class CardLocalization
     {
-        public bool IsTakenByPlayer { get; private set; } = false;
-        public GameCardType Type { get; private set; } = GameCardType.Empty;
-        public int Level { get; private set; } = 1;
+        private Dictionary<CardType, string> _dictionary = new Dictionary<CardType, string>();
 
-        
-        public Card(GameCardType type,int level)
+        public CardLocalization()
+        {
+            _dictionary.Add(CardType.Empty, "Пусткая карта");
+            _dictionary.Add(CardType.Mage, "Маг");
+            _dictionary.Add(CardType.Warrior, "Воин");
+            _dictionary.Add(CardType.Archer, "лучник");
+            _dictionary.Add(CardType.Wolf, "Волк");
+            _dictionary.Add(CardType.Dragon, "Дракон");
+            _dictionary.Add(CardType.Rat, "Мышь");
+            _dictionary.Add(CardType.Priest, "Жрец");
+            _dictionary.Add(CardType.Rogue, "разбойник");
+            _dictionary.Add(CardType.Shaman, "Шаман");
+        }
+
+        public string GetCardInfoByType(CardType type) => _dictionary.TryGetValue(type, out string name) == true ? name : "Непределенная карта";
+    }
+
+    class Card
+    {
+        public CardType Type { get; private set; }
+        public bool IsTakenByPlayer { get; private set; } = false;
+
+        public Card(CardType type = CardType.Empty)
         {
             Type = type;
-            Level = level;
+        }
+
+        public void SetType(CardType type)
+        {
+            if( IsTakenByPlayer == false)
+            {
+                Type = type;
+            }
         }
 
         public void TakeMe() => IsTakenByPlayer = true;
     }
-
-    sealed class Deck
-    {
-        private List<Card> _cards = new List<Card>();
-        
-        public Deck(int cardCount, GameCardType[] cardTypesArray = null)
-        {
-            ResetCards(cardCount,cardTypesArray);
-        }
-
-        public void ResetCards(int cardCount, GameCardType[] cardTypesArray = null)
-        {
-            Random currentType = new Random();
-            int maxRandomBound = 0;
-        
-            if(cardTypesArray != null && cardTypesArray.Length != 0)
-            {
-                maxRandomBound = cardTypesArray.Length;
-            }
-
-            for (int i = 0; i < cardCount; i++)
-            {
-                _cards[i] = new Card( (GameCardType)currentType.Next(0,maxRandomBound), 1 );
-            }
-        }
-
-        public void TakeCards(int count)
-        {
-            int takenCards = 0;
-
-            for(int i = 0; i < count; i++)
-            {
-                Card currentCard = _cards[i];
-
-                if (currentCard != null && currentCard.IsTakenByPlayer == false)
-                {
-                    currentCard.TakeMe();
-                    takenCards++;
-                }
-                else
-                {
-                    i--;
-                    continue;
-                }
-            }
-
-            Console.WriteLine("Вы вытащили " + takenCards + " карт(у/ы) из колоды!");
-            Console.WriteLine("В колоде осталось "+GetFreeCardsCount()+" карт(ы)!");
-        }
-
-        public void TakeCurrentCard(int number)
-        {
-            if(number>=0 && number < _cards.Count)
-            {
-                if(_cards[number] != null && _cards[number].IsTakenByPlayer == false)
-                {
-                    _cards[number].TakeMe();
-                }
-            }
-
-        }
-
-        public int GetFreeCardsCount()
-        {
-            int freeCardsCount = 0;
-
-            for (int i = 0; i < _cards.Count; i++)
-            {
-                if(_cards[i].IsTakenByPlayer == false)
-                {
-                    freeCardsCount++;
-                }
-            }
-
-            return freeCardsCount;
-        }
-
-        public int GetCardsCount() => _cards.Count;
-    }
-
 }
