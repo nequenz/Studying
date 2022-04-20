@@ -10,7 +10,6 @@ namespace Tired
             UserInputMenu menu = new UserInputMenu(new Deck(20));
 
             menu.Update();
-   
         }
     }
 
