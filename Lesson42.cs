@@ -44,7 +44,7 @@ namespace Tired
             while (_bookStorage != null && _wordToRead != WordToExit)
             {
                 ShowUsefulInfo();
-                _bookStorage.ShowItems();
+                _bookStorage.ShowAllBooks();
                 _bookStorage.ShowSortedBooks();
 
                 Console.Write("\nВвод:");
@@ -169,72 +169,7 @@ namespace Tired
         }
     }
 
-    abstract class Storage
-    {
-        protected List<Item> ItemList = new List<Item>();
-
-        public bool Add(Item item)
-        {
-            if (item != null)
-            {
-                ItemList.Add(item);
-
-                return true;
-            }
-
-            return false;
-        }
-
-        public bool RemoveByID(int id)
-        {
-            Item entity = GetItemByID(id);
-
-            if (entity != null)
-            {
-                ItemList.Remove(entity);
-
-                return true;
-            }
-
-            return false;
-        }
-
-        public virtual void ShowItems()
-        {
-            foreach (Item entity in ItemList)
-            {
-                Console.WriteLine("Объект типа " + entity.ToString() + " с ид " + entity.ID);
-            }
-        }
-
-        private Item GetItemByID(int id)
-        {
-            foreach (Item entity in ItemList)
-            {
-                if (entity.ID == id)
-                {
-                    return entity;
-                }
-            }
-
-            return null;
-        }
-    }
-
-    abstract class Item
-    {
-        private static int NextID = 0;
-
-        public int ID { get; private set; } = 0;
-
-        public Item()
-        {
-            ID = NextID;
-            NextID++;
-        }
-    }
-
-    class Book : Item
+    class Book 
     {
         public string Title { get; private set; }
         public string Author { get; private set; }
@@ -249,8 +184,9 @@ namespace Tired
 
     }
 
-    class BookStorage : Storage
+    class BookStorage 
     {
+        private List<Book> _bookList = new List<Book>();
         private List<Book> _sortedBooks = new List<Book>();
 
         public void ClearSortedBooks() => _sortedBooks.Clear();
@@ -259,9 +195,9 @@ namespace Tired
         {
             ClearSortedBooks();
 
-            foreach (Item item in ItemList)
+            foreach (Book book in _bookList)
             {
-                _sortedBooks.Add(item as Book);
+                _sortedBooks.Add(book);
             }
         }
 
@@ -275,23 +211,35 @@ namespace Tired
             }
         }
 
-        public override void ShowItems()
+        public void ShowAllBooks()
         {
             Console.WriteLine("--Полный список книг--");
 
-            foreach (Book book in ItemList)
+            foreach (Book book in _bookList)
             {
                 Console.WriteLine("Книга под названием '" + book.Title + "', автор " + book.Author + " изданная в " + book.ReleaseDate.ToShortDateString());
             }
         }
 
+        public bool Add(Book book)
+        {
+            if (book != null)
+            {
+                _bookList.Add(book);
+
+                return true;
+            }
+
+            return false;
+        }
+
         public bool Remove(string title, string author)
         {
-            foreach (Book book in ItemList)
+            foreach (Book book in _bookList)
             {
                 if (book.Title == title && book.Author == author)
                 {
-                    ItemList.Remove(book);
+                    _bookList.Remove(book);
 
                     return true;
                 }
