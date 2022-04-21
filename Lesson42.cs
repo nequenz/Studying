@@ -41,7 +41,7 @@ namespace Tired
 
         public void Update()
         {
-            while (_bookStorage != null  && _wordToRead != WordToExit)
+            while (_bookStorage != null && _wordToRead != WordToExit)
             {
                 ShowUsefulInfo();
                 _bookStorage.ShowItems();
@@ -104,7 +104,7 @@ namespace Tired
         {
             Console.Write("Введите ФИО автора:");
 
-            _bookStorage.SortByAuthor( Console.ReadLine() );
+            _bookStorage.SortByAuthor(Console.ReadLine());
         }
 
         public void SortByTitleByUser()
@@ -118,7 +118,7 @@ namespace Tired
         {
             Console.Write("Введите дату публикации книги:");
 
-            if ( DateTime.TryParse(Console.ReadLine(), out DateTime date) == true)
+            if (DateTime.TryParse(Console.ReadLine(), out DateTime date) == true)
             {
                 _bookStorage.SortByDate(date);
             }
@@ -141,7 +141,7 @@ namespace Tired
 
         public void AddBookByUser()
         {
-            ReadStringBookParams(out string bookName,out string bookAuthor);
+            ReadStringBookParams(out string bookName, out string bookAuthor);
             Console.Write("Введите дату публикации книги:");
 
             if (DateTime.TryParse(Console.ReadLine(), out DateTime date) == true && bookName != "" && bookAuthor != "")
@@ -158,7 +158,7 @@ namespace Tired
         {
             ReadStringBookParams(out string bookName, out string bookAuthor);
 
-            if( _bookStorage.Remove(bookName,bookAuthor) == true)
+            if (_bookStorage.Remove(bookName, bookAuthor) == true)
             {
                 Console.WriteLine("Книги удалена с хранилища!");
             }
@@ -171,19 +171,13 @@ namespace Tired
 
     abstract class Storage
     {
-        public const int EmptyID = -1;
-
-        protected List<Item> itemList = new List<Item>();
-        private int _nextID = 0;
-        
+        protected List<Item> ItemList = new List<Item>();
 
         public bool Add(Item item)
         {
-            if (item != null && item.ID == Storage.EmptyID)
+            if (item != null)
             {
-                item.ID = _nextID;
-                _nextID++;
-                itemList.Add(item);
+                ItemList.Add(item);
 
                 return true;
             }
@@ -197,7 +191,7 @@ namespace Tired
 
             if (entity != null)
             {
-                itemList.Remove(entity);
+                ItemList.Remove(entity);
 
                 return true;
             }
@@ -207,7 +201,7 @@ namespace Tired
 
         public virtual void ShowItems()
         {
-            foreach (Item entity in itemList)
+            foreach (Item entity in ItemList)
             {
                 Console.WriteLine("Объект типа " + entity.ToString() + " с ид " + entity.ID);
             }
@@ -215,7 +209,7 @@ namespace Tired
 
         private Item GetItemByID(int id)
         {
-            foreach (Item entity in itemList)
+            foreach (Item entity in ItemList)
             {
                 if (entity.ID == id)
                 {
@@ -229,19 +223,14 @@ namespace Tired
 
     abstract class Item
     {
-        private int _id = Storage.EmptyID;
+        private static int NextID = 0;
 
-        public int ID
+        public int ID { get; private set; } = 0;
+
+        public Item()
         {
-            get => _id;
-
-            set
-            {
-                if (_id == Storage.EmptyID)
-                {
-                    _id = value;
-                }
-            }
+            ID = NextID;
+            NextID++;
         }
     }
 
@@ -270,7 +259,7 @@ namespace Tired
         {
             ClearSortedBooks();
 
-            foreach (Item item in itemList)
+            foreach (Item item in ItemList)
             {
                 _sortedBooks.Add(item as Book);
             }
@@ -290,7 +279,7 @@ namespace Tired
         {
             Console.WriteLine("--Полный список книг--");
 
-            foreach (Book book in itemList)
+            foreach (Book book in ItemList)
             {
                 Console.WriteLine("Книга под названием '" + book.Title + "', автор " + book.Author + " изданная в " + book.ReleaseDate.ToShortDateString());
             }
@@ -298,11 +287,11 @@ namespace Tired
 
         public bool Remove(string title, string author)
         {
-            foreach (Book book in itemList)
+            foreach (Book book in ItemList)
             {
                 if (book.Title == title && book.Author == author)
                 {
-                    itemList.Remove(book);
+                    ItemList.Remove(book);
 
                     return true;
                 }
