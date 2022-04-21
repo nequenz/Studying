@@ -198,14 +198,12 @@ namespace Tired
         public void ShowSortedBooks()
         {
             Console.WriteLine("--Отсортированный список книг--");
-
             ShowBooks(_sortedBooks);
         }
 
         public void ShowAllBooks()
         {
             Console.WriteLine("--Полный список книг--");
-
             ShowBooks(_bookList);
         }
 
