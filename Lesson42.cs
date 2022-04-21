@@ -157,19 +157,13 @@ namespace Tired
         public void RemoveBookByUser()
         {
             ReadStringBookParams(out string bookName, out string bookAuthor);
+            _bookStorage.Remove(bookName, bookAuthor);
 
-            if (_bookStorage.Remove(bookName, bookAuthor) == true)
-            {
-                Console.WriteLine("Книги удалена с хранилища!");
-            }
-            else
-            {
-                Console.WriteLine("Книгу, которую вы хотите удалить, не существует...");
-            }
+            Console.WriteLine("Книги удалена с хранилища!");
         }
     }
 
-    class Book 
+    class Book
     {
         public string Title { get; private set; }
         public string Author { get; private set; }
@@ -184,7 +178,7 @@ namespace Tired
 
     }
 
-    class BookStorage 
+    class BookStorage
     {
         private List<Book> _bookList = new List<Book>();
         private List<Book> _sortedBooks = new List<Book>();
@@ -205,35 +199,33 @@ namespace Tired
         {
             Console.WriteLine("--Отсортированный список книг--");
 
-            foreach (Book book in _sortedBooks)
-            {
-                Console.WriteLine("Книга под названием '" + book.Title + "', автор " + book.Author + " изданная в " + book.ReleaseDate.ToShortDateString());
-            }
+            ShowBooks(_sortedBooks);
         }
 
         public void ShowAllBooks()
         {
             Console.WriteLine("--Полный список книг--");
 
-            foreach (Book book in _bookList)
+            ShowBooks(_bookList);
+        }
+
+        public void ShowBooks(List<Book> bookList)
+        {
+            foreach (Book book in bookList)
             {
                 Console.WriteLine("Книга под названием '" + book.Title + "', автор " + book.Author + " изданная в " + book.ReleaseDate.ToShortDateString());
             }
         }
-
-        public bool Add(Book book)
+    
+        public void Add(Book book)
         {
             if (book != null)
             {
                 _bookList.Add(book);
-
-                return true;
             }
-
-            return false;
         }
 
-        public bool Remove(string title, string author)
+        public void Remove(string title, string author)
         {
             foreach (Book book in _bookList)
             {
@@ -241,26 +233,24 @@ namespace Tired
                 {
                     _bookList.Remove(book);
 
-                    return true;
+                    return;
                 }
             }
-
-            return false;
         }
 
         public void SortByTitle(string title)
         {
-            _sortedBooks = _sortedBooks.FindAll(b => b.Title.Contains(title));
+            _sortedBooks = _sortedBooks.FindAll(book => book.Title.Contains(title));
         }
 
         public void SortByAuthor(string author)
         {
-            _sortedBooks = _sortedBooks.FindAll(b => b.Author.Contains(author));
+            _sortedBooks = _sortedBooks.FindAll(book => book.Author.Contains(author));
         }
 
         public void SortByDate(DateTime date)
         {
-            _sortedBooks = _sortedBooks.FindAll(b => b.ReleaseDate == date);
+            _sortedBooks = _sortedBooks.FindAll(book => book.ReleaseDate == date);
         }
     }
 }
