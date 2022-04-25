@@ -7,10 +7,11 @@ namespace Tired
     {
         static void Main(string[] args)
         {
-            
+            Inventory playerInventory = new Inventory(64);
+            Inventory traderInventory = new Inventory();
+            UserInputMenu menu = new UserInputMenu(traderInventory,playerInventory);
 
-
-
+            menu.Update();
         }
     }
 
@@ -22,19 +23,19 @@ namespace Tired
         private const string WordToShow = "show";
 
         private string _wordToRead;
-        private InventoriableEntity _trader;
-        private InventoriableEntity _player;
+        private Inventory _traderInventory;
+        private Inventory _playerInventory;
         private bool _isPlayerInventoryShown = false;
 
-        public UserInputMenu(InventoriableEntity trader, InventoriableEntity player)
+        public UserInputMenu(Inventory traderInventory, Inventory playerInventory)
         {
-            _player = player;
-            _trader = trader;
+            _playerInventory = playerInventory;
+            _traderInventory = traderInventory;
         }
 
         public void Update()
         {
-            while (_player != null && _trader != null && _wordToRead != WordToExit)
+            while (_playerInventory != null && _traderInventory != null && _wordToRead != WordToExit)
             {
                 ShowMenu();
 
@@ -109,7 +110,7 @@ namespace Tired
 
             ReadItemByUser(out int itemID, out int amount);
 
-            if(itemID != Item.EmptyID && amount != 0 && _trader.Inventory.TryMoveItemTo(itemID, amount, _player.Inventory))
+            if(itemID != Item.EmptyID && amount != 0 && _traderInventory.TryMoveItemTo(itemID, amount, _playerInventory))
             {
                 Console.WriteLine("Покупка совершена!");
             }
@@ -121,7 +122,7 @@ namespace Tired
 
             ReadItemByUser(out int itemID, out int amount);
 
-            if (itemID != Item.EmptyID && amount != 0 && _player.Inventory.TryMoveItemTo(itemID, amount, _trader.Inventory))
+            if (itemID != Item.EmptyID && amount != 0 && _playerInventory.TryMoveItemTo(itemID, amount, _traderInventory))
             {
                 Console.WriteLine("Продажа совершена!");
             }
@@ -135,23 +136,16 @@ namespace Tired
             Console.WriteLine("Введите " + WordToShow + " чтобы посмотреть свой инвентарь");
             Console.WriteLine("Введите " + WordToExit + " чтобы выйти");
             Console.WriteLine("Список предметов для покупки");
-            ShowItemsListOf(_trader);
+            _traderInventory.ShowItems();
 
-            if(_isPlayerInventoryShown == true)
+            if (_isPlayerInventoryShown == true)
             {
                 Console.WriteLine("Ваш инвентарь:");
-                ShowItemsListOf(_player);
+                _playerInventory.ShowItems();
             }
 
             Console.WriteLine();
         }
-
-        public void ShowItemsListOf(InventoriableEntity invEntity) => invEntity?.Inventory.ShowItems();
-    }
-
-    class InventoriableEntity
-    {
-        public Inventory Inventory { get; private set; } = new Inventory();
     }
 
     class Inventory
@@ -432,5 +426,4 @@ namespace Tired
             NextID++;
         }
     }
-
 }
