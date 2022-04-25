@@ -10,23 +10,36 @@ namespace Tired
         }
     }
 
-    class BigСarriage : Сarriage
+    class DirectionPath
     {
+        public Train currentTrain;
+        public string DeparturePoint { get; private set; }
+        public string ArrivalPoint { get; private set; }
 
-        public BigСarriage() : base(96)
-        {
 
-        }
     }
 
-    abstract class Сarriage
+    class Train
+    {
+        public List<Carriage> сarriages { get; private set; } = new List<Carriage>();
+    }
+
+    enum СarriageСapacityTypes
+    {
+        Short = 32,
+        Medium = 64,
+        Long = 128,
+    }
+
+    class Carriage
     {
         private const int BadIndex = -1;
         public PassengerPlace[] PassengerPlaces { get; private set; }
+        public int TrainNumber { get; private set; } = 0;
 
-        public Сarriage(int placeCount)
+        public Carriage(СarriageСapacityTypes type)
         {
-            PassengerPlaces = new PassengerPlace[placeCount];
+            PassengerPlaces = new PassengerPlace[(int)type];
         }
 
         public void ClearPassengerPlaces()
@@ -36,6 +49,8 @@ namespace Tired
                 PassengerPlaces[i].Clear();
             }
         }
+
+        public void SetNumber(int number) => TrainNumber = number;
 
         public int GetPlaceCount() => PassengerPlaces.Length;
 
@@ -58,12 +73,14 @@ namespace Tired
 
         public bool TryAddPassenger(PassengerPlace place)
         {
-            int index = FindFirstFreePlaceIndex();
-
-            if(index != BadIndex)
+            for (int i = 0; i < PassengerPlaces.Length; i++)
             {
-                PassengerPlaces[index] = place;
-                return true;
+                if (PassengerPlaces[i].IsFree() == true)
+                {
+                    PassengerPlaces[i] = place;
+
+                    return true;
+                }
             }
 
             return false;
@@ -73,7 +90,7 @@ namespace Tired
         {
             int index = FindIndexByPassengerPlace(place);
 
-            if(index != BadIndex)
+            if (index != BadIndex)
             {
                 PassengerPlaces[index].Clear();
 
@@ -95,19 +112,7 @@ namespace Tired
 
             return BadIndex;
         }
-    
-        private int FindFirstFreePlaceIndex()
-        {
-            for (int i = 0; i < PassengerPlaces.Length; i++)
-            {
-                if (PassengerPlaces[i].IsFree() == true)
-                {
-                    return i;
-                }
-            }
 
-            return BadIndex;
-        }
     }
 
     struct PassengerPlace
