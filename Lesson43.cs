@@ -7,20 +7,20 @@ namespace Tired
     {
         static void Main(string[] args)
         {
-            Person player = new Person("Игрок",10);
-            Person trader = new Person("Торгаш Ярик",10);
+            Person player = new Person("Игрок", 10);
+            Person trader = new Person("Торгаш Ярик", 10);
             UserInputMenu menu = new UserInputMenu(trader, player);
 
             player.SetGold(5500);
             trader.SetGold(8900);
-            
-            trader.CurrentInventory.TryAddItem(ItemBase.Meet, 28);
-            trader.CurrentInventory.TryAddItem(ItemBase.Bow, 3);
-            trader.CurrentInventory.TryAddItem(ItemBase.Axe, 1);
-            trader.CurrentInventory.TryAddItem(ItemBase.Sword, 5);
-            trader.CurrentInventory.TryAddItem(ItemBase.Beer, 13);
-            trader.CurrentInventory.TryAddItem(ItemBase.Bread, 45);
-            trader.CurrentInventory.TryAddItem(ItemBase.Stick, 18);
+
+            trader.TryAddItem(ItemBase.Meet, 28);
+            trader.TryAddItem(ItemBase.Bow, 3);
+            trader.TryAddItem(ItemBase.Axe, 1);
+            trader.TryAddItem(ItemBase.Sword, 5);
+            trader.TryAddItem(ItemBase.Beer, 13);
+            trader.TryAddItem(ItemBase.Bread, 45);
+            trader.TryAddItem(ItemBase.Stick, 18);
 
             menu.Update();
         }
@@ -121,7 +121,7 @@ namespace Tired
 
             ReadItemByUser(out int itemID, out int amount);
 
-            if (_player.TryBuyItem(itemID,amount,_trader) == true)
+            if (_player.TryBuyItem(itemID, amount, _trader) == true)
             {
                 Console.WriteLine("Покупка совершена!");
             }
@@ -164,8 +164,8 @@ namespace Tired
 
     class Person
     {
-        public string Name { get; private set; } 
-        public Inventory CurrentInventory { get; private set; }
+        public string Name { get; private set; }
+        private Inventory CurrentInventory { get; set; }
 
         public int Gold { get; private set; } = 0;
 
@@ -190,10 +190,10 @@ namespace Tired
 
             if (commonPrice <= person.Gold && CurrentInventory.TryMoveItemTo(itemID, amount, person.CurrentInventory))
             {
-                person.SetGold( person.Gold - commonPrice );
+                person.SetGold(person.Gold - commonPrice);
                 SetGold(Gold + commonPrice);
 
-                Console.WriteLine("Персонаж " + person.Name + " заработал "+commonPrice+" золота.");
+                Console.WriteLine("Персонаж " + person.Name + " заработал " + commonPrice + " золота.");
 
                 return true;
             }
@@ -205,9 +205,11 @@ namespace Tired
 
         public bool TryBuyItem(int itemID, int amount, Person person) => person.TrySellItemTo(itemID, amount, this);
 
+        public bool TryAddItem(int itemID, int amount) => CurrentInventory.TryAddItem(itemID, amount);
+
         public void ShowInventory()
         {
-            Console.WriteLine("\nПерсонаж:"+Name);
+            Console.WriteLine("\nПерсонаж:" + Name);
             Console.WriteLine("Текущее золото:" + Gold);
             CurrentInventory.ShowItems();
         }
@@ -311,7 +313,7 @@ namespace Tired
             }
         }
 
-        public bool HasItem(int itemID,int amount)
+        public bool HasItem(int itemID, int amount)
         {
             ItemCell itemCell = GetFirstItemCellByItemID(itemID);
 
@@ -441,13 +443,13 @@ namespace Tired
 
         static ItemBase()
         {
-            Bread = CreateNewItem(new Item("Хлеб",44));
-            Beer = CreateNewItem(new Item("Пиво",98));
-            Meet = CreateNewItem(new Item("Мясо",235));
-            Sword = CreateNewItem(new Item("Меч",2300));
-            Bow = CreateNewItem(new Item("Лук",2560));
-            Stick = CreateNewItem(new Item("Палка",56));
-            Axe = CreateNewItem(new Item("Топор",2900));
+            Bread = CreateNewItem(new Item("Хлеб", 44));
+            Beer = CreateNewItem(new Item("Пиво", 98));
+            Meet = CreateNewItem(new Item("Мясо", 235));
+            Sword = CreateNewItem(new Item("Меч", 2300));
+            Bow = CreateNewItem(new Item("Лук", 2560));
+            Stick = CreateNewItem(new Item("Палка", 56));
+            Axe = CreateNewItem(new Item("Топор", 2900));
         }
 
         public static int CreateNewItem(Item item)
@@ -490,18 +492,18 @@ namespace Tired
     {
         public const int EmptyID = -1;
 
-        private static int NextID = 0;
+        private static int _nextID = 0;
 
         public string Name { get; private set; }
         public int ID { get; private set; }
         public int Price { get; private set; }
 
-        public Item(string name,int price)
+        public Item(string name, int price)
         {
             Name = name;
             Price = price;
-            ID = NextID;
-            NextID++;
+            ID = _nextID;
+            _nextID++;
         }
     }
 }
