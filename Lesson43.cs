@@ -7,17 +7,20 @@ namespace Tired
     {
         static void Main(string[] args)
         {
-            InventoriableEntity playerInventory = new InventoriableEntity(10);
-            InventoriableEntity traderInventory = new InventoriableEntity(10);
-            UserInputMenu menu = new UserInputMenu(traderInventory, playerInventory);
+            Person player = new Person("Игрок",10);
+            Person trader = new Person("Торгаш Ярик",10);
+            UserInputMenu menu = new UserInputMenu(trader, player);
 
-            traderInventory.CurrentInventory.TryAddItem(ItemBase.Meet, 28);
-            traderInventory.CurrentInventory.TryAddItem(ItemBase.Bow, 3);
-            traderInventory.CurrentInventory.TryAddItem(ItemBase.Axe, 1);
-            traderInventory.CurrentInventory.TryAddItem(ItemBase.Sword, 5);
-            traderInventory.CurrentInventory.TryAddItem(ItemBase.Beer, 13);
-            traderInventory.CurrentInventory.TryAddItem(ItemBase.Bread, 45);
-            traderInventory.CurrentInventory.TryAddItem(ItemBase.Stick, 18);
+            player.SetGold(5500);
+            trader.SetGold(8900);
+            
+            trader.CurrentInventory.TryAddItem(ItemBase.Meet, 28);
+            trader.CurrentInventory.TryAddItem(ItemBase.Bow, 3);
+            trader.CurrentInventory.TryAddItem(ItemBase.Axe, 1);
+            trader.CurrentInventory.TryAddItem(ItemBase.Sword, 5);
+            trader.CurrentInventory.TryAddItem(ItemBase.Beer, 13);
+            trader.CurrentInventory.TryAddItem(ItemBase.Bread, 45);
+            trader.CurrentInventory.TryAddItem(ItemBase.Stick, 18);
 
             menu.Update();
         }
@@ -31,11 +34,11 @@ namespace Tired
         private const string WordToShow = "show";
 
         private string _wordToRead;
-        private InventoriableEntity _trader;
-        private InventoriableEntity _player;
+        private Person _trader;
+        private Person _player;
         private bool _isPlayerInventoryShown = false;
 
-        public UserInputMenu(InventoriableEntity trader, InventoriableEntity player)
+        public UserInputMenu(Person trader, Person player)
         {
             _player = player;
             _trader = trader;
@@ -71,7 +74,7 @@ namespace Tired
                         break;
                 }
 
-                Console.Clear();
+                //Console.Clear();
             }
         }
 
@@ -118,7 +121,7 @@ namespace Tired
 
             ReadItemByUser(out int itemID, out int amount);
 
-            if (_trader.TryGiveItemTo(itemID, amount, _player) == true)
+            if (_player.TryBuyItem(itemID,amount,_trader) == true)
             {
                 Console.WriteLine("Покупка совершена!");
             }
@@ -134,7 +137,7 @@ namespace Tired
 
             ReadItemByUser(out int itemID, out int amount);
 
-            if (_player.TryGiveItemTo(itemID, amount, _trader))
+            if (_player.TrySellItemTo(itemID, amount, _trader))
             {
                 Console.WriteLine("Произошла ошибка..");
             }
@@ -147,31 +150,66 @@ namespace Tired
             Console.WriteLine(" *Введите " + WordToSell + " для продажи предмета");
             Console.WriteLine(" *Введите " + WordToShow + " чтобы посмотреть свой инвентарь");
             Console.WriteLine(" *Введите " + WordToExit + " чтобы выйти");
-            Console.WriteLine("\nСписок предметов для покупки у продовца");
-            _trader.CurrentInventory.ShowItems();
+            _trader.ShowInventory();
 
             if (_isPlayerInventoryShown == true)
             {
-                Console.WriteLine("Ваш инвентарь:");
-                _player.CurrentInventory.ShowItems();
+                Console.WriteLine("Ваш инвентарь");
+                _player.ShowInventory();
             }
 
             Console.WriteLine();
         }
     }
 
-    class InventoriableEntity
+    class Person
     {
+        public string Name { get; private set; } 
         public Inventory CurrentInventory { get; private set; }
 
-        public InventoriableEntity(int inventorySize)
+        public int Gold { get; private set; } = 0;
+
+        public Person(string name, int inventorySize)
         {
+            Name = name;
             CurrentInventory = new Inventory(inventorySize);
         }
 
-        public bool TryGiveItemTo(int itemID,int amount,InventoriableEntity otherEntity)
+        public void SetGold(int gold) => Gold = gold;
+
+        public bool TrySellItemTo(int itemID, int amount, Person person)
         {
-            return CurrentInventory.TryMoveItemTo(itemID, amount, otherEntity.CurrentInventory);
+            int commonPrice;
+
+            if (CurrentInventory.HasItem(itemID, amount) == false)
+            {
+                return false;
+            }
+
+            commonPrice = ItemBase.GetItemByID(itemID).Price * amount;
+
+            if (commonPrice <= person.Gold && CurrentInventory.TryMoveItemTo(itemID, amount, person.CurrentInventory))
+            {
+                person.SetGold( person.Gold - commonPrice );
+                SetGold(Gold + commonPrice);
+
+                Console.WriteLine("Персонаж " + person.Name + " заработал "+commonPrice+" золота.");
+
+                return true;
+            }
+
+            Console.WriteLine("Персонаж " + person.Name + " не обладает таким количеством золота...");
+
+            return false;
+        }
+
+        public bool TryBuyItem(int itemID, int amount, Person person) => person.TrySellItemTo(itemID, amount, this);
+
+        public void ShowInventory()
+        {
+            Console.WriteLine("\nПерсонаж:"+Name);
+            Console.WriteLine("Текущее золото:" + Gold);
+            CurrentInventory.ShowItems();
         }
     }
 
@@ -271,6 +309,13 @@ namespace Tired
             {
                 Console.WriteLine(cell.GetItemInfo());
             }
+        }
+
+        public bool HasItem(int itemID,int amount)
+        {
+            ItemCell itemCell = GetFirstItemCellByItemID(itemID);
+
+            return itemCell != null && itemCell.Amount >= amount;
         }
 
         private ItemCell GetFirstItemCellByItemID(int itemID)
@@ -396,13 +441,13 @@ namespace Tired
 
         static ItemBase()
         {
-            Bread = CreateNewItem(new Item("Хлеб"));
-            Beer = CreateNewItem(new Item("Пиво"));
-            Meet = CreateNewItem(new Item("Мясо"));
-            Sword = CreateNewItem(new Item("Меч"));
-            Bow = CreateNewItem(new Item("Лук"));
-            Stick = CreateNewItem(new Item("Палка"));
-            Axe = CreateNewItem(new Item("Топор"));
+            Bread = CreateNewItem(new Item("Хлеб",44));
+            Beer = CreateNewItem(new Item("Пиво",98));
+            Meet = CreateNewItem(new Item("Мясо",235));
+            Sword = CreateNewItem(new Item("Меч",2300));
+            Bow = CreateNewItem(new Item("Лук",2560));
+            Stick = CreateNewItem(new Item("Палка",56));
+            Axe = CreateNewItem(new Item("Топор",2900));
         }
 
         public static int CreateNewItem(Item item)
@@ -449,10 +494,12 @@ namespace Tired
 
         public string Name { get; private set; }
         public int ID { get; private set; }
+        public int Price { get; private set; }
 
-        public Item(string name)
+        public Item(string name,int price)
         {
             Name = name;
+            Price = price;
             ID = NextID;
             NextID++;
         }
