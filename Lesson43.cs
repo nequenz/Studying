@@ -11,6 +11,14 @@ namespace Tired
             Inventory traderInventory = new Inventory();
             UserInputMenu menu = new UserInputMenu(traderInventory,playerInventory);
 
+            traderInventory.TryAddItem(ItemBase.Meet,28);
+            traderInventory.TryAddItem(ItemBase.Bow, 3);
+            traderInventory.TryAddItem(ItemBase.Axe, 1);
+            traderInventory.TryAddItem(ItemBase.Sword, 5);
+            traderInventory.TryAddItem(ItemBase.Beer, 13);
+            traderInventory.TryAddItem(ItemBase.Bread, 45);
+            traderInventory.TryAddItem(ItemBase.Stick, 18);
+
             menu.Update();
         }
     }
@@ -110,9 +118,13 @@ namespace Tired
 
             ReadItemByUser(out int itemID, out int amount);
 
-            if(itemID != Item.EmptyID && amount != 0 && _traderInventory.TryMoveItemTo(itemID, amount, _playerInventory))
+            if(_traderInventory.TryMoveItemTo(itemID, amount, _playerInventory) == true)
             {
                 Console.WriteLine("Покупка совершена!");
+            }
+            else
+            {
+                Console.WriteLine("Произошла ошибка..");
             }
         }
 
@@ -122,9 +134,9 @@ namespace Tired
 
             ReadItemByUser(out int itemID, out int amount);
 
-            if (itemID != Item.EmptyID && amount != 0 && _playerInventory.TryMoveItemTo(itemID, amount, _traderInventory))
+            if (_playerInventory.TryMoveItemTo(itemID, amount, _traderInventory))
             {
-                Console.WriteLine("Продажа совершена!");
+                Console.WriteLine("Произошла ошибка..");
             }
         }
 
@@ -165,6 +177,8 @@ namespace Tired
 
         public void Clear()
         {
+            _cells.Clear();
+
             for (int i = 0; i < MaxCells; i++)
             {
                 _cells.Add(new ItemCell(64));
@@ -203,11 +217,11 @@ namespace Tired
 
         public bool TryRemoveItem(int itemID, int amount)
         {
-            ItemCell cell = GetItemCellByItemID(itemID);
+            ItemCell cell = GetFirstItemCellByItemID(itemID);
 
             if (cell != null)
             {
-                cell.SetAmount(amount);
+                cell.SetAmount(cell.Amount-amount);
 
                 return true;
             }
@@ -217,7 +231,7 @@ namespace Tired
 
         public bool TryMoveItemTo(int itemID,int amount,Inventory otherInventory)
         {
-            ItemCell cell = GetItemCellByItemID(itemID);
+            ItemCell cell = GetFirstItemCellByItemID(itemID);
 
             if(cell == null || otherInventory == null || cell.Amount<amount)
             {
@@ -244,7 +258,7 @@ namespace Tired
             }
         }
 
-        private ItemCell GetItemCellByItemID(int itemID)
+        private ItemCell GetFirstItemCellByItemID(int itemID)
         {
             if(itemID == Item.EmptyID)
             {
@@ -283,7 +297,7 @@ namespace Tired
                 }
                 else if (value > MaxAmount)
                 {
-                    _amount = value;
+                    _amount = MaxAmount;
                 }
                 else if (value <= 0)
                 {
@@ -334,8 +348,6 @@ namespace Tired
             int resultAmount = Amount + amount;
 
             overAmount = resultAmount > MaxAmount ? (resultAmount - MaxAmount) : 0;
-
-            SetItemID(itemID);
             SetAmount(resultAmount);
 
             return true;
@@ -412,9 +424,9 @@ namespace Tired
 
     class Item
     {
-        public const int EmptyID = -1;
-
         private static int NextID = 0;
+
+        public const int EmptyID = -1;
 
         public string Name { get; private set; }
         public int ID { get; private set; }
