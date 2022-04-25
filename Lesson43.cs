@@ -7,17 +7,17 @@ namespace Tired
     {
         static void Main(string[] args)
         {
-            Inventory playerInventory = new Inventory(10);
-            Inventory traderInventory = new Inventory(10);
-            UserInputMenu menu = new UserInputMenu(traderInventory,playerInventory);
+            InventoriableEntity playerInventory = new InventoriableEntity(10);
+            InventoriableEntity traderInventory = new InventoriableEntity(10);
+            UserInputMenu menu = new UserInputMenu(traderInventory, playerInventory);
 
-            traderInventory.TryAddItem(ItemBase.Meet,28);
-            traderInventory.TryAddItem(ItemBase.Bow, 3);
-            traderInventory.TryAddItem(ItemBase.Axe, 1);
-            traderInventory.TryAddItem(ItemBase.Sword, 5);
-            traderInventory.TryAddItem(ItemBase.Beer, 13);
-            traderInventory.TryAddItem(ItemBase.Bread, 45);
-            traderInventory.TryAddItem(ItemBase.Stick, 18);
+            traderInventory.CurrentInventory.TryAddItem(ItemBase.Meet, 28);
+            traderInventory.CurrentInventory.TryAddItem(ItemBase.Bow, 3);
+            traderInventory.CurrentInventory.TryAddItem(ItemBase.Axe, 1);
+            traderInventory.CurrentInventory.TryAddItem(ItemBase.Sword, 5);
+            traderInventory.CurrentInventory.TryAddItem(ItemBase.Beer, 13);
+            traderInventory.CurrentInventory.TryAddItem(ItemBase.Bread, 45);
+            traderInventory.CurrentInventory.TryAddItem(ItemBase.Stick, 18);
 
             menu.Update();
         }
@@ -31,19 +31,19 @@ namespace Tired
         private const string WordToShow = "show";
 
         private string _wordToRead;
-        private Inventory _traderInventory;
-        private Inventory _playerInventory;
+        private InventoriableEntity _trader;
+        private InventoriableEntity _player;
         private bool _isPlayerInventoryShown = false;
 
-        public UserInputMenu(Inventory traderInventory, Inventory playerInventory)
+        public UserInputMenu(InventoriableEntity trader, InventoriableEntity player)
         {
-            _playerInventory = playerInventory;
-            _traderInventory = traderInventory;
+            _player = player;
+            _trader = trader;
         }
 
         public void Update()
         {
-            while (_playerInventory != null && _traderInventory != null && _wordToRead != WordToExit)
+            while (_player != null && _trader != null && _wordToRead != WordToExit)
             {
                 ShowMenu();
 
@@ -83,13 +83,13 @@ namespace Tired
             {
                 _isPlayerInventoryShown = true;
             }
-            else if(Console.ReadLine() == "нет")
+            else if (Console.ReadLine() == "нет")
             {
                 _isPlayerInventoryShown = false;
             }
         }
 
-        public void ReadItemByUser(out int itemID,out int amount)
+        public void ReadItemByUser(out int itemID, out int amount)
         {
             Console.Write("\nВведите имя предмета:");
 
@@ -118,7 +118,7 @@ namespace Tired
 
             ReadItemByUser(out int itemID, out int amount);
 
-            if(_traderInventory.TryMoveItemTo(itemID, amount, _playerInventory) == true)
+            if (_trader.TryGiveItemTo(itemID, amount, _player) == true)
             {
                 Console.WriteLine("Покупка совершена!");
             }
@@ -134,7 +134,7 @@ namespace Tired
 
             ReadItemByUser(out int itemID, out int amount);
 
-            if (_playerInventory.TryMoveItemTo(itemID, amount, _traderInventory))
+            if (_player.TryGiveItemTo(itemID, amount, _trader))
             {
                 Console.WriteLine("Произошла ошибка..");
             }
@@ -148,15 +148,30 @@ namespace Tired
             Console.WriteLine(" *Введите " + WordToShow + " чтобы посмотреть свой инвентарь");
             Console.WriteLine(" *Введите " + WordToExit + " чтобы выйти");
             Console.WriteLine("\nСписок предметов для покупки у продовца");
-            _traderInventory.ShowItems();
+            _trader.CurrentInventory.ShowItems();
 
             if (_isPlayerInventoryShown == true)
             {
                 Console.WriteLine("Ваш инвентарь:");
-                _playerInventory.ShowItems();
+                _player.CurrentInventory.ShowItems();
             }
 
             Console.WriteLine();
+        }
+    }
+
+    class InventoriableEntity
+    {
+        public Inventory CurrentInventory { get; private set; }
+
+        public InventoriableEntity(int inventorySize)
+        {
+            CurrentInventory = new Inventory(inventorySize);
+        }
+
+        public bool TryGiveItemTo(int itemID,int amount,InventoriableEntity otherEntity)
+        {
+            return CurrentInventory.TryMoveItemTo(itemID, amount, otherEntity.CurrentInventory);
         }
     }
 
@@ -167,7 +182,7 @@ namespace Tired
         private List<ItemCell> _cells = new List<ItemCell>();
 
         public int MaxCells { get; private set; }
-        
+
         public Inventory(int maxCells = DefaultMaxCells)
         {
             MaxCells = maxCells;
@@ -185,18 +200,18 @@ namespace Tired
             }
         }
 
-        public bool TryAddItem(int itemID,int amount)
+        public bool TryAddItem(int itemID, int amount)
         {
             ItemCell neededCell = null;
 
-            if(itemID == Item.EmptyID)
+            if (itemID == Item.EmptyID)
             {
                 return false;
             }
 
-            foreach(ItemCell cell in _cells)
+            foreach (ItemCell cell in _cells)
             {
-                if( (cell.SavedItemID == itemID) || (neededCell == null && cell.SavedItemID == Item.EmptyID) )
+                if ((cell.SavedItemID == itemID) || (neededCell == null && cell.SavedItemID == Item.EmptyID))
                 {
                     neededCell = cell;
                 }
@@ -221,7 +236,7 @@ namespace Tired
 
             if (cell != null)
             {
-                cell.SetAmount(cell.Amount-amount);
+                cell.SetAmount(cell.Amount - amount);
 
                 return true;
             }
@@ -229,18 +244,18 @@ namespace Tired
             return false;
         }
 
-        public bool TryMoveItemTo(int itemID,int amount,Inventory otherInventory)
+        public bool TryMoveItemTo(int itemID, int amount, Inventory otherInventory)
         {
             ItemCell cell = GetFirstItemCellByItemID(itemID);
 
-            if(cell == null || otherInventory == null || cell.Amount<amount)
+            if (cell == null || otherInventory == null || cell.Amount < amount)
             {
                 return false;
             }
 
             if (otherInventory.TryAddItem(cell.SavedItemID, amount) == true)
             {
-                cell.SetAmount(cell.Amount-amount);
+                cell.SetAmount(cell.Amount - amount);
 
                 return true;
             }
@@ -260,7 +275,7 @@ namespace Tired
 
         private ItemCell GetFirstItemCellByItemID(int itemID)
         {
-            if(itemID == Item.EmptyID)
+            if (itemID == Item.EmptyID)
             {
                 return null;
             }
@@ -274,7 +289,7 @@ namespace Tired
             }
 
             return null;
-        } 
+        }
     }
 
     class ItemCell
@@ -287,11 +302,14 @@ namespace Tired
         public int MaxAmount { get; private set; }
         public int Amount
         {
-            get { return _amount; }
+            get
+            {
+                return _amount;
+            }
 
             private set
             {
-                if(SavedItemID == Item.EmptyID)
+                if (SavedItemID == Item.EmptyID)
                 {
                     _amount = 0;
                 }
@@ -324,7 +342,7 @@ namespace Tired
 
         public bool TryMoveItemTo(ItemCell itemCell)
         {
-            if(itemCell != null)
+            if (itemCell != null)
             {
                 itemCell.SetItemID(SavedItemID);
                 itemCell.SetAmount(Amount);
@@ -338,7 +356,7 @@ namespace Tired
 
         public bool TryAddItem(int itemID, int amount, out int overAmount)
         {
-            if (SavedItemID != itemID && SavedItemID != Item.EmptyID )
+            if (SavedItemID != itemID && SavedItemID != Item.EmptyID)
             {
                 overAmount = 0;
 
@@ -360,7 +378,7 @@ namespace Tired
 
         public Item GetItem() => ItemBase.GetItemByID(SavedItemID);
 
-        public string GetItemInfo() => (SavedItemID == Item.EmptyID) ? "Пустой слот" : GetItem().Name+":"+Amount;
+        public string GetItemInfo() => (SavedItemID == Item.EmptyID) ? "Пустой слот" : GetItem().Name + ":" + Amount;
     }
 
     static class ItemBase
@@ -374,7 +392,7 @@ namespace Tired
         public static readonly int Stick;
         public static readonly int Axe;
 
-        private static Dictionary<int,Item> _itemsDictionary = new Dictionary<int,Item>();
+        private static Dictionary<int, Item> _itemsDictionary = new Dictionary<int, Item>();
 
         static ItemBase()
         {
@@ -389,19 +407,19 @@ namespace Tired
 
         public static int CreateNewItem(Item item)
         {
-            if(item == null)
+            if (item == null)
             {
                 return Item.EmptyID;
             }
 
-            _itemsDictionary.Add(item.ID,item);
-                
+            _itemsDictionary.Add(item.ID, item);
+
             return item.ID;
         }
 
         public static Item GetItemByID(int itemID)
         {
-            if( _itemsDictionary.TryGetValue(itemID, out Item item) == true )
+            if (_itemsDictionary.TryGetValue(itemID, out Item item) == true)
             {
                 return item;
             }
@@ -411,9 +429,9 @@ namespace Tired
 
         public static int GetItemIDByName(string name)
         {
-            foreach(KeyValuePair<int,Item> pair in _itemsDictionary)
+            foreach (KeyValuePair<int, Item> pair in _itemsDictionary)
             {
-                if( pair.Value.Name == name)
+                if (pair.Value.Name == name)
                 {
                     return pair.Value.ID;
                 }
@@ -425,9 +443,9 @@ namespace Tired
 
     class Item
     {
-        private static int NextID = 0;
-
         public const int EmptyID = -1;
+
+        private static int NextID = 0;
 
         public string Name { get; private set; }
         public int ID { get; private set; }
