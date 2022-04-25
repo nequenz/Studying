@@ -7,8 +7,8 @@ namespace Tired
     {
         static void Main(string[] args)
         {
-            Inventory playerInventory = new Inventory(64);
-            Inventory traderInventory = new Inventory();
+            Inventory playerInventory = new Inventory(10);
+            Inventory traderInventory = new Inventory(10);
             UserInputMenu menu = new UserInputMenu(traderInventory,playerInventory);
 
             traderInventory.TryAddItem(ItemBase.Meet,28);
@@ -142,12 +142,12 @@ namespace Tired
 
         public void ShowMenu()
         {
-            Console.WriteLine("Вы классическом магазине 15-го века и торгуете с продавцом!\nСписок предментов для покупки");
-            Console.WriteLine("Введите " + WordToBuy + " для покупки предмета");
-            Console.WriteLine("Введите " + WordToSell + " для продажи предмета");
-            Console.WriteLine("Введите " + WordToShow + " чтобы посмотреть свой инвентарь");
-            Console.WriteLine("Введите " + WordToExit + " чтобы выйти");
-            Console.WriteLine("Список предметов для покупки");
+            Console.WriteLine("Вы классическом магазине 15-го века и торгуете с продавцом!");
+            Console.WriteLine(" *Введите " + WordToBuy + " для покупки предмета");
+            Console.WriteLine(" *Введите " + WordToSell + " для продажи предмета");
+            Console.WriteLine(" *Введите " + WordToShow + " чтобы посмотреть свой инвентарь");
+            Console.WriteLine(" *Введите " + WordToExit + " чтобы выйти");
+            Console.WriteLine("\nСписок предметов для покупки у продовца");
             _traderInventory.ShowItems();
 
             if (_isPlayerInventoryShown == true)
@@ -162,7 +162,7 @@ namespace Tired
 
     class Inventory
     {
-        private const int DefaultMaxCells = 128;
+        private const int DefaultMaxCells = 16;
 
         private List<ItemCell> _cells = new List<ItemCell>();
 
@@ -254,7 +254,7 @@ namespace Tired
 
             foreach (ItemCell cell in _cells)
             {
-                Console.WriteLine(cell.GetItemName());
+                Console.WriteLine(cell.GetItemInfo());
             }
         }
 
@@ -338,7 +338,7 @@ namespace Tired
 
         public bool TryAddItem(int itemID, int amount, out int overAmount)
         {
-            if(SavedItemID != itemID || SavedItemID != Item.EmptyID)
+            if (SavedItemID != itemID && SavedItemID != Item.EmptyID )
             {
                 overAmount = 0;
 
@@ -348,6 +348,7 @@ namespace Tired
             int resultAmount = Amount + amount;
 
             overAmount = resultAmount > MaxAmount ? (resultAmount - MaxAmount) : 0;
+            SetItemID(itemID);
             SetAmount(resultAmount);
 
             return true;
@@ -359,7 +360,7 @@ namespace Tired
 
         public Item GetItem() => ItemBase.GetItemByID(SavedItemID);
 
-        public string GetItemName() => (SavedItemID == Item.EmptyID) ? "Пустой слот" : GetItem().Name;
+        public string GetItemInfo() => (SavedItemID == Item.EmptyID) ? "Пустой слот" : GetItem().Name+":"+Amount;
     }
 
     static class ItemBase
