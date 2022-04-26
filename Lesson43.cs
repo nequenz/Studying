@@ -164,15 +164,15 @@ namespace Tired
 
     class Person
     {
-        public string Name { get; private set; }
-        private Inventory CurrentInventory { get; set; }
+        private Inventory _currentInventory;
 
+        public string Name { get; private set; }
         public int Gold { get; private set; } = 0;
 
         public Person(string name, int inventorySize)
         {
             Name = name;
-            CurrentInventory = new Inventory(inventorySize);
+            _currentInventory = new Inventory(inventorySize);
         }
 
         public void SetGold(int gold) => Gold = gold;
@@ -181,14 +181,14 @@ namespace Tired
         {
             int commonPrice;
 
-            if (CurrentInventory.HasItem(itemID, amount) == false)
+            if (_currentInventory.HasItem(itemID, amount) == false)
             {
                 return false;
             }
 
             commonPrice = ItemBase.GetItemByID(itemID).Price * amount;
 
-            if (commonPrice <= person.Gold && CurrentInventory.TryMoveItemTo(itemID, amount, person.CurrentInventory))
+            if (commonPrice <= person.Gold && _currentInventory.TryMoveItemTo(itemID, amount, person._currentInventory))
             {
                 person.SetGold(person.Gold - commonPrice);
                 SetGold(Gold + commonPrice);
@@ -205,13 +205,13 @@ namespace Tired
 
         public bool TryBuyItem(int itemID, int amount, Person person) => person.TrySellItemTo(itemID, amount, this);
 
-        public bool TryAddItem(int itemID, int amount) => CurrentInventory.TryAddItem(itemID, amount);
+        public bool TryAddItem(int itemID, int amount) => _currentInventory.TryAddItem(itemID, amount);
 
         public void ShowInventory()
         {
             Console.WriteLine("\nПерсонаж:" + Name);
             Console.WriteLine("Текущее золото:" + Gold);
-            CurrentInventory.ShowItems();
+            _currentInventory.ShowItems();
         }
     }
 
