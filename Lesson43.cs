@@ -73,8 +73,6 @@ namespace Tired
                         SetPlayerInventoryShowModeByUser();
                         break;
                 }
-
-                //Console.Clear();
             }
         }
 
@@ -430,7 +428,6 @@ namespace Tired
 
     static class ItemBase
     {
-        /* Example Test WriteTable */
         public static readonly int Bread;
         public static readonly int Beer;
         public static readonly int Meet;
