@@ -20,6 +20,7 @@ namespace Tired
         private const string WordToCreateDirection = "создать_направление";
         private const string WordToSellTicket = "продать_билеты";
         private const string WordToCreateTrain = "создать_поезд";
+        private const string WordToCreateCarriages = "создать_вагоны";
         private const string WordToDepart = "отправить_поезд";
         private const string WordToClear = "очистить";
 
@@ -59,56 +60,89 @@ namespace Tired
                     case WordToCreateTrain:
                         CreateTrainByUser();
                         break;
+
+                    case WordToCreateCarriages:
+                        CreateCarriageByUser();
+                        break;
+
+                    case WordToSellTicket:
+                        SellTicketsByUser();
+                        break;
+
+                    case WordToDepart:
+                        DepartDirectionByUser();
+                        break;
                 }
             }
         }
 
         private void CreateDirectionPathByUser()
         {
-            string departName;
-            string arrivalName;
             DirectionPath direction;
 
-            Console.WriteLine("Введите точку отправки и точку прибытия");
+            if(TryReadDirectionPathByUser(out string arrivalName, out string departName) == true)
+            {
+                direction = new DirectionPath(departName, arrivalName);
 
-            Console.Write("Место посадки:");
-            departName = Console.ReadLine();
+                _directionPathHandler.Add(direction);
 
-            Console.Write("Место прибытия:");
-            arrivalName = Console.ReadLine();
+                Console.WriteLine(direction.ToString() + " создано!");
+            }
+        }
 
-            if(departName == "" || arrivalName == "")
+        private bool TryReadDirectionPathByUser(out string arrivalPoint, out string departurePoint)
+        {
+            Console.Write("Введите точку прибытия:");
+            arrivalPoint = Console.ReadLine();
+
+            Console.Write("Введите точку посадки:");
+            departurePoint = Console.ReadLine();
+
+            if (arrivalPoint == "" || departurePoint == "")
             {
                 Console.WriteLine("Ошибка ввода");
+
+                return false;
             }
 
-            direction = new DirectionPath(departName, arrivalName);
+            return true;
+        }
 
-            _directionPathHandler.Add(direction);
+        private DirectionPath GetDirectionPathByReadLine()
+        {
+            if (TryReadDirectionPathByUser(out string arrivalName, out string departName) == true)
+            {
+                return _directionPathHandler.FindDirectionPathByPoints(arrivalName, departName);
+            }
 
-            Console.WriteLine(direction.ToString()+" создано!");
+            return null;
         }
 
         private void CreateTrainByUser()
         {
-            int directionIndex = 0;
             string trainNumber;
+            DirectionPath direction;
             Train train;
 
             Console.WriteLine("Организация поезда");
-            Console.Write("Введите номер направления, к которому будет присоединен поезд:");
+            Console.WriteLine("Введите данные направления, к которому будет присоединен поезд");
 
-            if (int.TryParse( Console.ReadLine(),out directionIndex) == true && (directionIndex>=0 && directionIndex<_directionPathHandler.CurrentDirectionPathCount))
+            direction = GetDirectionPathByReadLine();
+
+            if (direction != null)
             {
                 Console.Write("\nВведите номер поезда:");
+
                 trainNumber = Console.ReadLine();
 
-                if(trainNumber != "")
+                if (trainNumber != "")
                 {
                     train = new Train(trainNumber);
-                    _directionPathHandler.TryJoinTrainToByIndex(directionIndex, train);
 
-                    Console.WriteLine(train.ToString()+" создан и прикреплен к направлению!");
+                    if (direction.TryJoinTrain(train) == true)
+                    {
+                        Console.WriteLine(train.ToString() + " создан и прикреплен к направлению!");
+                    }
                 }
 
                 return;
@@ -119,13 +153,81 @@ namespace Tired
 
         private void CreateCarriageByUser()
         {
+            DirectionPath direction;
 
+            Console.WriteLine("Присоединение вагона к поезду");
+            Console.WriteLine("Осуществите поиск направления:");
+
+            direction = GetDirectionPathByReadLine();
+
+            if (direction != null && direction.HasTrain() == true && direction.IsTrainDeparted() == false)
+            {
+                Console.WriteLine(direction.ToAdvancedString());
+                Console.Write("Введите размер вагона(короткий,средний, длинный):");
+
+                switch (Console.ReadLine())
+                {
+                    case "короткий":
+                        direction.JoinCarriageToTrain(new Carriage(СarriageСapacityTypes.Short));
+                        break;
+
+                    case "средний":
+                        direction.JoinCarriageToTrain(new Carriage(СarriageСapacityTypes.Medium));
+                        break;
+
+                    case "длинный":
+                        direction.JoinCarriageToTrain(new Carriage(СarriageСapacityTypes.Long));
+                        break;
+                }
+
+                return;
+            }
+
+            Console.WriteLine("Ошибка в создании вагона...");
         }
 
         private void SellTicketsByUser()
         {
-            Console.WriteLine("");
+            DirectionPath direction;
 
+            Console.WriteLine("\nПродажа билетов\nОсуществите поиск направления:");
+
+            direction = GetDirectionPathByReadLine();
+
+            if (direction != null)
+            {
+                direction.ShowWaitingList();
+
+                Console.Write("\nВведите номер пассажира для резерва пассажирского места:");
+
+                if ((int.TryParse(Console.ReadLine(), out int index) == true) && (direction.TryAddPassengerFromWaitingList(index) == true))
+                {
+                    Console.WriteLine("Билет продан!");
+                }
+
+                return;
+            }
+
+            Console.WriteLine("Ошибка продажи билета...");
+        }
+
+        private void DepartDirectionByUser()
+        {
+            DirectionPath direction;
+
+            Console.WriteLine("Присоединение вагона к поезду");
+            Console.WriteLine("Осуществите поиск направления:");
+
+            direction = GetDirectionPathByReadLine();
+
+            if(direction.HasTrain() == true && direction.IsTrainDeparted() == true)
+            {
+                direction.DepartTrain();
+            }
+            else
+            {
+                Console.WriteLine("У данного направления нет поезда или он отправлен!");
+            }
         }
 
         private void ShowMenu()
@@ -136,6 +238,7 @@ namespace Tired
             Console.WriteLine("Введите <" + WordToCreateDirection + "> чтобы создать направление следования");
             Console.WriteLine("Введите <" + WordToSellTicket + "> чтобы продать билеты");
             Console.WriteLine("Введите <" + WordToCreateTrain + "> чтобы создать поезд");
+            Console.WriteLine("Введите <" + WordToCreateCarriages + "> чтобы прицепить вагон");
             Console.WriteLine("Введите <" + WordToDepart + "> чтобы отправить поезд");
 
             Console.WriteLine();
@@ -175,59 +278,45 @@ namespace Tired
         {
             Console.WriteLine("---Организованные направления---");
 
-            for(int i = 0; i < _directions.Count; i++)
+            for (int i = 0; i < _directions.Count; i++)
             {
-                Console.Write("     ["+i+"] "+_directions[i].ToAdvancedString());
+                Console.Write("     [" + i + "] " + _directions[i].ToAdvancedString());
             }
         }
 
-        public bool TryJoinTrainToByIndex(int index,Train train)
+        public DirectionPath FindDirectionPathByPoints(string arrivalPoint,string departurePoint)
         {
-            if(index>=0 && index < _directions.Count && _directions[index] != null)
-            {
-                return _directions[index].TryJoinTrain(train) == true;
-            }
-
-            return false;
+            return _directions.Find(direction => direction.ArrivalPoint.Equals(arrivalPoint) && direction.DeparturePoint.Equals(departurePoint));
         }
+
     }
 
     class DirectionPath
     {
+        private List<PassengerPlace> _waitingPassengerList = new List<PassengerPlace>();
         private Train _currentTrain;
 
         public string DeparturePoint { get; private set; }
         public string ArrivalPoint { get; private set; }
-        public List<PassengerPlace> WaitingPassengerList { get; private set; } =  new List<PassengerPlace>();
         public int WaitingPassengerCount
         {
             get
             {
-                return WaitingPassengerList.Count;
+                return _waitingPassengerList.Count;
             }
         }
 
-        public DirectionPath(string departurePoint,string arrivalPoint)
+        public DirectionPath(string departurePoint, string arrivalPoint)
         {
             DeparturePoint = departurePoint;
             ArrivalPoint = arrivalPoint;
 
-            WaitingPassengerList.AddRange( PassengerRandomizer.CreatePassengerArray() );
-        }
-
-        public void ShowTrainInfo()
-        {
-            ToAdvancedString();
-
-            for(int i = 0; i < _currentTrain.CarriageCount; i++)
-            {
-                _currentTrain.ShowCarriageInfoByIndex(i);
-            }
+            _waitingPassengerList.AddRange(PassengerRandomizer.CreatePassengerArray());
         }
 
         public bool TryJoinTrain(Train train)
         {
-            if ((_currentTrain != null && _currentTrain.IsDeparted == true) || train == null)
+            if (train == null || (_currentTrain != null && _currentTrain.IsDeparted == true) )
             {
                 return false;
             }
@@ -237,12 +326,52 @@ namespace Tired
             return true;
         }
 
+        public bool TryAddPassengerFromWaitingList(int index)
+        {
+            if (_currentTrain == null)
+            {
+                return false;
+            }
+
+            if ( (index >= 0 && index < WaitingPassengerCount) && _currentTrain.TryAddPassenger(_waitingPassengerList[index]) == true )
+            {
+                _waitingPassengerList.RemoveAt(index);
+
+                return true;
+            }
+
+            return false;
+        }
+
+        public void ShowWaitingList()
+        {
+            Console.WriteLine("Список пассажиров ждущих поезда:");
+
+            for(int i = 0; i < WaitingPassengerCount; i++)
+            {
+                Console.WriteLine("[" + i + "] " + _waitingPassengerList[i].ToString());
+            }
+
+            Console.WriteLine();
+        }
+
         public override string ToString()
         {
             return "Направление " + DeparturePoint + " - " + ArrivalPoint;
         }
 
-        public string ToAdvancedString() => (ToString() + ":" + _currentTrain?.ToAdvancedString()+", ждущие пассажиры:"+ WaitingPassengerCount);
+        public string ToAdvancedString()
+        {
+            return (_currentTrain != null) ? (ToString() + ":" + _currentTrain?.ToAdvancedString() + ", ждущие пассажиры:" + WaitingPassengerCount) : ToString();
+        }
+
+        public bool HasTrain() => (_currentTrain != null);
+
+        public bool IsTrainDeparted() => (_currentTrain != null) ? _currentTrain.IsDeparted : false;
+
+        public void JoinCarriageToTrain(Carriage carriage) => _currentTrain?.JoinCarriage(carriage);
+
+        public void DepartTrain() => _currentTrain?.Depart();
     }
 
     class Train
@@ -259,18 +388,17 @@ namespace Tired
         public string Number { get; private set; }
         public bool IsDeparted { get; private set; } = false;
 
-        public Train(string number)
-        {
-            Number = number;
-        }
-
-        public void Depart()
-        {
-            IsDeparted = true;
-        }
+        public Train(string number) => Number = number;
 
         public void JoinCarriage(Carriage carriage)
         {
+            if (IsDeparted == true)
+            {
+                Console.WriteLine("Поезд отправлен, сцепка вагона запрещена!");
+
+                return;
+            }
+
             _carriages.Add(carriage);
 
             Console.WriteLine("Вагон сцеплен!");
@@ -278,9 +406,9 @@ namespace Tired
 
         public void ShowFullPassengerList()
         {
-            Console.WriteLine("Список пассажиров поезда "+Number);
+            Console.WriteLine("Список пассажиров поезда " + Number);
 
-            foreach(Carriage car in _carriages)
+            foreach (Carriage car in _carriages)
             {
                 car.ShowPassengerList();
             }
@@ -288,7 +416,7 @@ namespace Tired
 
         public void ShowCarriageInfoByIndex(int index)
         {
-            if(index>=0 && index < _carriages.Count)
+            if (index >= 0 && index < _carriages.Count)
             {
                 _carriages[index].ShowPassengerList();
             }
@@ -298,13 +426,15 @@ namespace Tired
         {
             int count = 0;
 
-            foreach(Carriage car in _carriages)
+            foreach (Carriage car in _carriages)
             {
                 count += car.GetPlaceCount();
             }
 
             return count;
         }
+
+        public int GetOccupiedPlaces() => (GetPlacesCount() - GetFreePlaces());
 
         public int GetFreePlaces()
         {
@@ -318,8 +448,6 @@ namespace Tired
             return count;
         }
 
-        public int GetOccupiedPlaces() => (GetPlacesCount() - GetFreePlaces());
-
         public override string ToString()
         {
             return "Поезд #" + Number;
@@ -327,8 +455,28 @@ namespace Tired
 
         public string ToAdvancedString()
         {
-            return ToString() + " [Всего мест:" + GetPlacesCount() + ", занятых:" + GetOccupiedPlaces() + ", свободных:" + GetFreePlaces()+"]";
+            return ToString() + " [Всего мест:" + GetPlacesCount() + ", занятых:" + GetOccupiedPlaces() + ", свободных:" + GetFreePlaces() + "]";
         }
+
+        public bool TryAddPassenger(PassengerPlace place)
+        {
+            if (IsDeparted == true)
+            {
+                return false;
+            }
+
+            foreach (Carriage car in _carriages)
+            {
+                if (car.TryAddPassenger(place) == true)
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        public void Depart() => IsDeparted = true;
     }
 
     enum СarriageСapacityTypes
@@ -342,23 +490,25 @@ namespace Tired
     {
         private const int BadIndex = -1;
 
-        public PassengerPlace[] PassengerPlaces { get; private set; }
-        
+        private PassengerPlace[] _passengerPlaces;
+
         public Carriage(СarriageСapacityTypes type)
         {
-            PassengerPlaces = new PassengerPlace[(int)type];
+            _passengerPlaces = new PassengerPlace[(int)type];
+
+            ClearPassengerPlaces();
         }
 
         public void ShowPassengerList()
         {
             Console.WriteLine("Список пассажиров вагона:");
 
-            for(int i = 0; i < PassengerPlaces.Length; i++)
+            for (int i = 0; i < _passengerPlaces.Length; i++)
             {
-                PassengerPlace place = PassengerPlaces[i];
-                if(place.IsFree() == false)
+                PassengerPlace place = _passengerPlaces[i];
+                if (place.IsFree() == false)
                 {
-                    Console.WriteLine("Место #" + i + " занято " + PassengerPlaces[i].FullName + "  " + PassengerPlaces[i].Passport);
+                    Console.WriteLine("Место #" + i + " занято " + _passengerPlaces[i].ToString());
                 }
                 else
                 {
@@ -371,21 +521,23 @@ namespace Tired
 
         public void ClearPassengerPlaces()
         {
-            for (int i = 0; i < PassengerPlaces.Length; i++)
+            for (int i = 0; i < _passengerPlaces.Length; i++)
             {
-                PassengerPlaces[i].Clear();
+                _passengerPlaces[i].Clear();
             }
         }
 
-        public int GetPlaceCount() => PassengerPlaces.Length;
+        public int GetPlaceCount() => _passengerPlaces.Length;
+
+        public int GetOccupiedPlaceCount() => (GetPlaceCount() - GetFreePlaceCount());
 
         public int GetFreePlaceCount()
         {
             int count = 0;
 
-            for (int i = 0; i < PassengerPlaces.Length; i++)
+            for (int i = 0; i < _passengerPlaces.Length; i++)
             {
-                if (PassengerPlaces[i].IsFree() == true)
+                if (_passengerPlaces[i].IsFree() == true)
                 {
                     count++;
                 }
@@ -394,15 +546,13 @@ namespace Tired
             return count;
         }
 
-        public int GetOccupiedPlacesCount() => (GetPlaceCount() - GetFreePlaceCount());
-
         public bool TryAddPassenger(PassengerPlace place)
         {
-            for (int i = 0; i < PassengerPlaces.Length; i++)
+            for (int i = 0; i < _passengerPlaces.Length; i++)
             {
-                if (PassengerPlaces[i].IsFree() == true)
+                if (_passengerPlaces[i].IsFree() == true)
                 {
-                    PassengerPlaces[i] = place;
+                    _passengerPlaces[i] = place;
 
                     return true;
                 }
@@ -417,7 +567,7 @@ namespace Tired
 
             if (index != BadIndex)
             {
-                PassengerPlaces[index].Clear();
+                _passengerPlaces[index].Clear();
 
                 return true;
             }
@@ -427,9 +577,9 @@ namespace Tired
 
         private int FindIndexByPassengerPlace(PassengerPlace place)
         {
-            for (int i = 0; i < PassengerPlaces.Length; i++)
+            for (int i = 0; i < _passengerPlaces.Length; i++)
             {
-                if (PassengerPlaces[i].Equals(place) == true)
+                if (_passengerPlaces[i].Equals(place) == true)
                 {
                     return i;
                 }
@@ -445,7 +595,7 @@ namespace Tired
         public string FullName { get; private set; }
         public string Passport { get; private set; }
 
-        public PassengerPlace(string fullname,string passport)
+        public PassengerPlace(string fullname, string passport)
         {
             FullName = fullname;
             Passport = passport;
@@ -463,6 +613,10 @@ namespace Tired
 
         public bool IsFree() => (FullName == "" && Passport == "");
 
+        public override string ToString()
+        {
+            return FullName + "  " + Passport;
+        }
     }
 
     static class PassengerRandomizer
@@ -493,11 +647,11 @@ namespace Tired
 
         public static PassengerPlace[] CreatePassengerArray()
         {
-            int randomCount = new Random().Next(MinRandomBound,MaxRandomBound);
+            int randomCount = new Random().Next(MinRandomBound, MaxRandomBound);
 
             PassengerPlace[] passengerPlaces = new PassengerPlace[randomCount];
 
-            for(int i=0;i< randomCount; i++)
+            for (int i = 0; i < randomCount; i++)
             {
                 passengerPlaces[i] = CreatePassenger();
             }
@@ -511,14 +665,14 @@ namespace Tired
         {
             Random random = new Random();
 
-            return _names[random.Next(0, _names.Length)] + " " + _surnames[random.Next(0, _surnames.Length)]; 
+            return _names[random.Next(0, _names.Length)] + " " + _surnames[random.Next(0, _surnames.Length)];
         }
 
         private static string CreatePassport()
         {
-            Random  random = new Random();
+            Random random = new Random();
 
-            return random.Next(1000, 10000).ToString()+" "+random.Next(100000,1000000).ToString();
+            return random.Next(1000, 10000).ToString() + " " + random.Next(100000, 1000000).ToString();
         }
     }
 }
