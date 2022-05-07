@@ -156,9 +156,9 @@ namespace Tired
 
 	sealed class Game
 	{
-		private List<IUpdateable> _entities = new List<IUpdateable>();
 		private readonly int _stepPerMilisecond = 1500;
-
+		private List<IUpdateable> _entities = new List<IUpdateable>();
+		
 		public int MaxEntityCount { get; private set; } = 2;
 		public int Step { get; private set; } = 0;
 		public bool IsStarted { get; private set; } = false;
@@ -227,11 +227,11 @@ namespace Tired
 	{
 		public Skeleton()
 		{
-			float damagePercent = _specialAbility.DamageValue * Ability.PercentFactor;
+			float damagePercent = SpecialAbility.DamageValue * Ability.PercentFactor;
 
 			SetStats(50, 5, 0.01f);
-			_specialAbility.SetValues(2.0f, 0.0f, 0.0f);
-			_specialAbility.SetInfo("Тык", "Вы тыкаете выпирающей костью, нанося урон в размере "
+			SpecialAbility.SetValues(2.0f, 0.0f, 0.0f);
+			SpecialAbility.SetInfo("Тык", "Вы тыкаете выпирающей костью, нанося урон в размере "
 				+ damagePercent + " % от вашей силы. Также у вас есть шанс рассыпаться во время сражения!");
 		}
 
@@ -251,7 +251,7 @@ namespace Tired
 
 			if (randomDeath == 0)
 			{
-				TakeDamage(Health);
+				TakeDamage(CurrentHealth);
 			}
 		}
 	}
@@ -260,13 +260,13 @@ namespace Tired
 	{
 		public Demon()
 		{
-			float damagePercent = _specialAbility.DamageValue * Ability.PercentFactor; 
+			float damagePercent = SpecialAbility.DamageValue * Ability.PercentFactor;
 
 			SetStats(570, 85, 0.70f);
-			_specialAbility.SetValues(2.75f, 18.0f, 0.0f);
-			_specialAbility.SetInfo("Пожирание", "Вы пожираете душу противника, нанося урон в размере "
+			SpecialAbility.SetValues(2.75f, 18.0f, 0.0f);
+			SpecialAbility.SetInfo("Пожирание", "Вы пожираете душу противника, нанося урон в размере "
 				+ damagePercent + " % от вашей силы" +
-				" и восполняя " + _specialAbility.RestoreValue + " ед. здоровья");
+				" и восполняя " + SpecialAbility.RestoreValue + " ед. здоровья");
 		}
 
 		public override void Update()
@@ -280,11 +280,11 @@ namespace Tired
 	{
 		public Rogue()
 		{
-			float damagePercent = _specialAbility.DamageValue * Ability.PercentFactor;
+			float damagePercent = SpecialAbility.DamageValue * Ability.PercentFactor;
 
 			SetStats(180, 12, 0.10f);
-			_specialAbility.SetValues(3.75f, 0.0f, 0.0f);
-			_specialAbility.SetInfo("Удар в спину", "Вы бьете кинжалом в спину, нанося урон в размере " + damagePercent + " % от вашей силы.");
+			SpecialAbility.SetValues(3.75f, 0.0f, 0.0f);
+			SpecialAbility.SetInfo("Удар в спину", "Вы бьете кинжалом в спину, нанося урон в размере " + damagePercent + " % от вашей силы.");
 		}
 
 		public override void Update()
@@ -298,11 +298,11 @@ namespace Tired
 	{
 		public Mage()
 		{
-			float damagePercent = _specialAbility.DamageValue * Ability.PercentFactor;
+			float damagePercent = SpecialAbility.DamageValue * Ability.PercentFactor;
 
 			SetStats(120, 43, 0.05f);
-			_specialAbility.SetValues(1.25f, 0.0f, 0.0f);
-			_specialAbility.SetInfo("Огненный шар", "Вы наносите огненный шаром урон, в размере " + damagePercent + " % от вашей силы.");
+			SpecialAbility.SetValues(1.25f, 0.0f, 0.0f);
+			SpecialAbility.SetInfo("Огненный шар", "Вы наносите огненный шаром урон, в размере " + damagePercent + " % от вашей силы.");
 		}
 
 		public override void Update()
@@ -316,11 +316,11 @@ namespace Tired
 	{
 		public Warrior()
 		{
-			float damagePercent = _specialAbility.DamageValue * Ability.PercentFactor;
+			float damagePercent = SpecialAbility.DamageValue * Ability.PercentFactor;
 
 			SetStats(200, 20, 0.22f);
-			_specialAbility.SetValues(2.4f, 0.0f, 0.0f);
-			_specialAbility.SetInfo("Рывок", "Вы совершаете рывок противнику, нанося урон в размере " + damagePercent + " % от вашей силы.");
+			SpecialAbility.SetValues(2.4f, 0.0f, 0.0f);
+			SpecialAbility.SetInfo("Рывок", "Вы совершаете рывок противнику, нанося урон в размере " + damagePercent + " % от вашей силы.");
 		}
 
 		public override void Update()
@@ -332,8 +332,8 @@ namespace Tired
 
 	abstract class Hero : IUpdateable, ICloneable
 	{
-		protected int _health;
-		protected Ability _specialAbility;
+		protected int Health;
+		protected Ability SpecialAbility;
 
 		public bool IsDead { get; private set; } = false;
 		public string Name { get; private set; } = "Безымянный";
@@ -341,27 +341,27 @@ namespace Tired
 		public float Armory { get; private set; } = 0.0f;
 		public float Stunned { get; private set; } = 0.0f;
 		public int MaxHealth { get; private set; } = 100;
-		public int Health
+		public int CurrentHealth
 		{
 			get
 			{
-				return _health;
+				return Health;
 			}
 
 			private set
 			{
 				if (value > MaxHealth)
 				{
-					_health = MaxHealth;
+					Health = MaxHealth;
 				}
 				else if (value <= 0)
 				{
-					_health = 0;
+					Health = 0;
 					IsDead = true;
 				}
 				else
 				{
-					_health = value;
+					Health = value;
 				}
 			}
 
@@ -387,17 +387,17 @@ namespace Tired
 
 		public void SetMaxHealth(int maxHealth) => MaxHealth = maxHealth;
 
-		public void SetHealth(int health) => Health = health;
+		public void SetHealth(int health) => CurrentHealth = health;
 
-		public void TakeDamage(int damageCount) => Health -= (int)(damageCount * (1.0f - Armory));
+		public void TakeDamage(int damageCount) => CurrentHealth -= (int)(damageCount * (1.0f - Armory));
 
 		public void TakeStun(float stunTime) => Stunned = stunTime;
 
-		public void RestoreHealth(int health) => Health += health;
+		public void RestoreHealth(int health) => CurrentHealth += health;
 
 		public void Attack() => Target?.TakeDamage(Strenght);
 
-		public string GetStatus() => (IsDead == false) ? Name + ":" + Health + "/" + MaxHealth + " жив" : Name + ":" + Health + "/" + MaxHealth + " мертв";
+		public string GetStatus() => (IsDead == false) ? Name + ":" + CurrentHealth + "/" + MaxHealth + " жив" : Name + ":" + CurrentHealth + "/" + MaxHealth + " мертв";
 
 		public bool IsTargetValid() => (Target != null && Target.IsDead == false);
 
@@ -407,9 +407,9 @@ namespace Tired
 			{
 				ShowAbilityUsing();
 
-				Target.TakeDamage((int)(Strenght * _specialAbility.DamageValue));
-				Target.TakeStun(_specialAbility.StunValue);
-				RestoreHealth((int)_specialAbility.RestoreValue);
+				Target.TakeDamage((int)(Strenght * SpecialAbility.DamageValue));
+				Target.TakeStun(SpecialAbility.StunValue);
+				RestoreHealth((int)SpecialAbility.RestoreValue);
 			}
 			else
 			{
@@ -419,15 +419,15 @@ namespace Tired
 
 		public virtual void Update()
 		{
-			Console.WriteLine("Ход персонажа " + Name + "\nЗдоровье:" + Health + "/" + MaxHealth);
+			Console.WriteLine("Ход персонажа " + Name + "\nЗдоровье:" + CurrentHealth + "/" + MaxHealth);
 		}
 
-		public virtual void ShowAbilityUsing() => Console.WriteLine("Персонаж " + Name + " использует " + _specialAbility.ToString());
+		public virtual void ShowAbilityUsing() => Console.WriteLine("Персонаж " + Name + " использует " + SpecialAbility.ToString());
 
 		public virtual object Clone()
 		{
 			Hero cloned = MemberwiseClone() as Hero;
-			cloned._specialAbility = _specialAbility;
+			cloned.SpecialAbility = SpecialAbility;
 
 			return cloned;
 		}
