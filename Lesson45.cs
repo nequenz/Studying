@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 
 namespace Tired
@@ -83,11 +83,11 @@ namespace Tired
 		}
 
 		private void StartGameByUser()
-        {
+		{
 			_game.Start();
 
-			if(_game.IsStarted == true && _game.IsOver == false)
-            {
+			if (_game.IsStarted == true && _game.IsOver == false)
+			{
 				Hero first = (_game.GetEntity(0) as Hero);
 				Hero second = (_game.GetEntity(1) as Hero);
 
@@ -97,10 +97,10 @@ namespace Tired
 		}
 
 		private void UpdateGame()
-        {
+		{
 			_game.Update();
 
-			if(_game.IsOver == true)
+			if (_game.IsOver == true)
 			{
 				Hero first = _game.GetEntity(0) as Hero;
 				Hero second = _game.GetEntity(1) as Hero;
@@ -127,15 +127,15 @@ namespace Tired
 		{
 			Console.WriteLine("Выберите персонажа для сражения:");
 
-			foreach(KeyValuePair<string, Hero> pair in _heroListToChoose)
-            {
+			foreach (KeyValuePair<string, Hero> pair in _heroListToChoose)
+			{
 				Console.WriteLine("[" + pair.Key + "]");
 			}
 
 			Console.Write("Введите тип бойца(типы перечислены выше):");
 
-			if(_heroListToChoose.TryGetValue(Console.ReadLine(),out Hero hero) == true)
-            {
+			if (_heroListToChoose.TryGetValue(Console.ReadLine(), out Hero hero) == true)
+			{
 				hero = hero.Clone() as Hero;
 
 				Console.Write("Введите имя бойца:");
@@ -165,7 +165,7 @@ namespace Tired
 		public bool IsOver { get; private set; } = false;
 
 		public void Start()
-        {
+		{
 			IsStarted = IsEntityListFull();
 			IsOver = false;
 		}
@@ -190,8 +190,8 @@ namespace Tired
 
 		public void Update()
 		{
-            while (IsStarted == true && IsOver == false)
-            {
+			while (IsStarted == true && IsOver == false)
+			{
 				UpdateEntities();
 
 				Step++;
@@ -204,12 +204,12 @@ namespace Tired
 			{
 				Hero hero = entity as Hero;
 
-				if(hero.IsDead == false)
-                {
+				if (hero.IsDead == false)
+				{
 					entity.Update();
-                }
-                else
-                {
+				}
+				else
+				{
 					IsOver = true;
 					IsStarted = false;
 
@@ -226,7 +226,7 @@ namespace Tired
 	class Skeleton : Hero
 	{
 		public Skeleton()
-        {
+		{
 			SetStats(50, 5, 0.01f);
 			_specialAbility.SetValues(2.0f, 0.0f, 0.0f);
 			_specialAbility.SetInfo("Тык", "Вы тыкаете выпирающей костью, нанося урон в размере "
@@ -246,24 +246,24 @@ namespace Tired
 			int randomMin = 0;
 			base.UseSpecialAbility();
 
-			int randomDeath = new Random().Next(randomMin,randomMax);
+			int randomDeath = new Random().Next(randomMin, randomMax);
 
-			if(randomDeath == 0)
-            {
+			if (randomDeath == 0)
+			{
 				TakeDamage(Health);
-            }
+			}
 		}
 	}
 
 	class Demon : Hero
 	{
 		public Demon()
-        {
+		{
 			SetStats(570, 85, 0.70f);
 			_specialAbility.SetValues(2.75f, 18.0f, 0.0f);
 			_specialAbility.SetInfo("Пожирание", "Вы пожираете душу противника, нанося урон в размере "
 				+ (_specialAbility.DamageValue * 100) + " % от вашей силы" +
-                " и восполняя "+_specialAbility.RestoreValue+" ед. здоровья");
+				" и восполняя " + _specialAbility.RestoreValue + " ед. здоровья");
 		}
 
 		public override void Update()
@@ -276,7 +276,7 @@ namespace Tired
 	class Rogue : Hero
 	{
 		public Rogue()
-        {
+		{
 			SetStats(180, 12, 0.10f);
 			_specialAbility.SetValues(3.75f, 0.0f, 0.0f);
 			_specialAbility.SetInfo("Удар в спину", "Вы бьете кинжалом в спину, нанося урон в размере " + (_specialAbility.DamageValue * 100) + " % от вашей силы.");
@@ -292,7 +292,7 @@ namespace Tired
 	class Mage : Hero
 	{
 		public Mage()
-        {
+		{
 			SetStats(120, 43, 0.05f);
 			_specialAbility.SetValues(1.25f, 0.0f, 0.0f);
 			_specialAbility.SetInfo("Огненный шар", "Вы наносите огненный шаром урон, в размере " + (_specialAbility.DamageValue * 100) + " % от вашей силы.");
@@ -303,7 +303,7 @@ namespace Tired
 			base.Update();
 			UseSpecialAbility();
 		}
-    }
+	}
 
 	class Warrior : Hero
 	{
@@ -314,8 +314,8 @@ namespace Tired
 			_specialAbility.SetInfo("Рывок", "Вы совершаете рывок противнику, нанося урон в размере " + (_specialAbility.DamageValue * 100) + " % от вашей силы.");
 		}
 
-        public override void Update()
-        {
+		public override void Update()
+		{
 			base.Update();
 			UseSpecialAbility();
 		}
@@ -325,8 +325,8 @@ namespace Tired
 	{
 		protected int _health;
 		protected Ability _specialAbility;
-		
-		public bool IsDead { get; private set; } = false;	
+
+		public bool IsDead { get; private set; } = false;
 		public string Name { get; private set; } = "Безымянный";
 		public int Strenght { get; private set; } = 10;
 		public float Armory { get; private set; } = 0.0f;
@@ -388,12 +388,12 @@ namespace Tired
 
 		public void Attack() => Target?.TakeDamage(Strenght);
 
-		public string GetStatus() => (IsDead == false) ? Name + ":"+Health+"/"+MaxHealth+" жив" : Name + ":" + Health + "/" + MaxHealth + " мертв";
+		public string GetStatus() => (IsDead == false) ? Name + ":" + Health + "/" + MaxHealth + " жив" : Name + ":" + Health + "/" + MaxHealth + " мертв";
 
 		public bool IsTargetValid() => (Target != null && Target.IsDead == false);
 
 		public virtual void UseSpecialAbility()
-        {
+		{
 			if (IsTargetValid())
 			{
 				ShowAbilityUsing();
@@ -409,31 +409,31 @@ namespace Tired
 		}
 
 		public virtual void Update()
-        {
-			Console.WriteLine("Ход персонажа "+Name+"\nЗдоровье:"+Health+"/"+MaxHealth);
-        }
+		{
+			Console.WriteLine("Ход персонажа " + Name + "\nЗдоровье:" + Health + "/" + MaxHealth);
+		}
 
 		public virtual void ShowAbilityUsing() => Console.WriteLine("Персонаж " + Name + " использует " + _specialAbility.ToString());
 
 		public virtual object Clone()
-        {
+		{
 			Hero cloned = MemberwiseClone() as Hero;
 			cloned._specialAbility = _specialAbility;
 
 			return cloned;
 		}
-    }
+	}
 
-	struct Ability 
+	struct Ability
 	{
-		public string Name { get; private set; } 
+		public string Name { get; private set; }
 		public string Description { get; private set; }
-		public float DamageValue { get; private set; } 
-		public float RestoreValue { get; private set; } 
-		public float StunValue { get; private set; } 
+		public float DamageValue { get; private set; }
+		public float RestoreValue { get; private set; }
+		public float StunValue { get; private set; }
 
 		public Ability(string name, string description)
-        {
+		{
 			Name = name;
 			Description = description;
 			DamageValue = 0.0f;
