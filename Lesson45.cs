@@ -70,9 +70,9 @@ namespace Tired
 
 		private void ShowMenu()
 		{
-			const int sleepTime = 1500;
+			const int SleepTime = 1500;
 
-			System.Threading.Thread.Sleep(sleepTime);
+			System.Threading.Thread.Sleep(SleepTime);
 			Console.Clear();
 			Console.WriteLine("--Игра 'Сражение'---\nИгра закончиться только тогда, когда один из двух сражающихся не погибнет!");
 			Console.WriteLine("Введите <" + WordToExit + "> для выхода!");
@@ -227,11 +227,12 @@ namespace Tired
 	{
 		public Skeleton()
 		{
+			float damagePercent = _specialAbility.DamageValue * Ability.PercentFactor;
+
 			SetStats(50, 5, 0.01f);
 			_specialAbility.SetValues(2.0f, 0.0f, 0.0f);
 			_specialAbility.SetInfo("Тык", "Вы тыкаете выпирающей костью, нанося урон в размере "
-				+ (_specialAbility.DamageValue * 100) + " % от вашей силы. Также у вас есть шанс рассыпаться во время сражения!");
-
+				+ damagePercent + " % от вашей силы. Также у вас есть шанс рассыпаться во время сражения!");
 		}
 
 		public override void Update()
@@ -244,9 +245,9 @@ namespace Tired
 		{
 			int randomMax = 10;
 			int randomMin = 0;
-			base.UseSpecialAbility();
-
 			int randomDeath = new Random().Next(randomMin, randomMax);
+
+			base.UseSpecialAbility();
 
 			if (randomDeath == 0)
 			{
@@ -259,10 +260,12 @@ namespace Tired
 	{
 		public Demon()
 		{
+			float damagePercent = _specialAbility.DamageValue * Ability.PercentFactor; 
+
 			SetStats(570, 85, 0.70f);
 			_specialAbility.SetValues(2.75f, 18.0f, 0.0f);
 			_specialAbility.SetInfo("Пожирание", "Вы пожираете душу противника, нанося урон в размере "
-				+ (_specialAbility.DamageValue * 100) + " % от вашей силы" +
+				+ damagePercent + " % от вашей силы" +
 				" и восполняя " + _specialAbility.RestoreValue + " ед. здоровья");
 		}
 
@@ -277,9 +280,11 @@ namespace Tired
 	{
 		public Rogue()
 		{
+			float damagePercent = _specialAbility.DamageValue * Ability.PercentFactor;
+
 			SetStats(180, 12, 0.10f);
 			_specialAbility.SetValues(3.75f, 0.0f, 0.0f);
-			_specialAbility.SetInfo("Удар в спину", "Вы бьете кинжалом в спину, нанося урон в размере " + (_specialAbility.DamageValue * 100) + " % от вашей силы.");
+			_specialAbility.SetInfo("Удар в спину", "Вы бьете кинжалом в спину, нанося урон в размере " + damagePercent + " % от вашей силы.");
 		}
 
 		public override void Update()
@@ -293,9 +298,11 @@ namespace Tired
 	{
 		public Mage()
 		{
+			float damagePercent = _specialAbility.DamageValue * Ability.PercentFactor;
+
 			SetStats(120, 43, 0.05f);
 			_specialAbility.SetValues(1.25f, 0.0f, 0.0f);
-			_specialAbility.SetInfo("Огненный шар", "Вы наносите огненный шаром урон, в размере " + (_specialAbility.DamageValue * 100) + " % от вашей силы.");
+			_specialAbility.SetInfo("Огненный шар", "Вы наносите огненный шаром урон, в размере " + damagePercent + " % от вашей силы.");
 		}
 
 		public override void Update()
@@ -309,9 +316,11 @@ namespace Tired
 	{
 		public Warrior()
 		{
+			float damagePercent = _specialAbility.DamageValue * Ability.PercentFactor;
+
 			SetStats(200, 20, 0.22f);
 			_specialAbility.SetValues(2.4f, 0.0f, 0.0f);
-			_specialAbility.SetInfo("Рывок", "Вы совершаете рывок противнику, нанося урон в размере " + (_specialAbility.DamageValue * 100) + " % от вашей силы.");
+			_specialAbility.SetInfo("Рывок", "Вы совершаете рывок противнику, нанося урон в размере " + damagePercent + " % от вашей силы.");
 		}
 
 		public override void Update()
@@ -426,6 +435,7 @@ namespace Tired
 
 	struct Ability
 	{
+		public const float PercentFactor = 100.0f;
 		public string Name { get; private set; }
 		public string Description { get; private set; }
 		public float DamageValue { get; private set; }
