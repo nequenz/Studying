@@ -1,10 +1,6 @@
 using System;
 using System.Collections.Generic;
 
-/*
-	TO-DO
-*/
-
 namespace Tired
 {
 	class Program
