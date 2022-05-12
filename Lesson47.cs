@@ -183,6 +183,6 @@ namespace Tired
 
 	public static class Helper
     {
-		public static int GetRandomValue(int minValue = 0, int maxValue = 1) => new Random().Next(minValue,maxValue);
+		public static int GetRandomValue(int minValue = 0, int maxValue = 1) => new Random().Next(minValue,maxValue); 
     }
 }
