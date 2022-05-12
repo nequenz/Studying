@@ -185,5 +185,4 @@ namespace Tired
     {
 		public static int GetRandomValue(int minValue = 0, int maxValue = 1) => new Random().Next(minValue,maxValue);
     }
-	
 }
