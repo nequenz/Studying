@@ -286,7 +286,7 @@ namespace Tired
 
 		public List<T> FindAllUpdatableObject(Predicate<T> predicate) => _updateablesList.FindAll(predicate);
 
-		public T FindUpdatableObject(Predicate<T> predicate) => _updateablesList.Find(predicate);
+		public T FindUpdatableObject(Predicate<T> predicate) => _updateablesList.Find(predicate); 
 
 		public T GetUpdatableObjectByIndex(int index)
         {
