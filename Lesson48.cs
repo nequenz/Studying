@@ -434,7 +434,7 @@ namespace Tired
 		public void Update();
 		public void Draw();
 		public void TakeEnumaratedPool<T>(EnumeratedPool<T> enumeratedPool) where T : IUpdatable;
-    }
+    } 
 
 	public static class Helper
     {
