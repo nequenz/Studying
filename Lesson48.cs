@@ -8,94 +8,223 @@ namespace Tired
 	{
 		static void Main(string[] args)
 		{
-			Console.ForegroundColor = ConsoleColor.Green;
-			Console.Write("1");
-			Console.ForegroundColor = ConsoleColor.Red;
-			Console.Write("2");
+			Game game = new Game();
+
+			game.Update();
 		}
 	}
 
+	public class Game
+	{
+		private readonly int _updatePerSecond = 100;
+		private UpdatablePool<Soilder> _objectPool = new UpdatablePool<Soilder>();
+
+		public bool IsOver { get; private set; } = false;
+
+		public Game()
+        {
+			CreateExamples();
+        }
+
+		public void CreateExamples()
+        {
+			int soilderCount = 50;
+			int offsetX = soilderCount / 2;
+			int distanceBeetwen = 4;
+
+			for (int i = 0; i < soilderCount; i++)
+			{
+				Damager damager = new Damager();
+
+				if (i < offsetX)
+				{
+					damager.CurrentPosition = new Vector(i * distanceBeetwen, 1);
+					damager.SetSkin(new RenderSkin('#', ConsoleColor.Red));
+				}
+				else
+				{
+					damager.CurrentPosition = new Vector(i * distanceBeetwen - offsetX * distanceBeetwen, 30);
+					damager.SetSkin(new RenderSkin('#', ConsoleColor.Blue));
+				}
+
+				_objectPool.Add(damager);
+			}
+		}
+		
+		public void Update()
+		{
+			while (_objectPool != null && IsOver == false)
+			{
+				_objectPool.Update();
+
+				System.Threading.Thread.Sleep(_updatePerSecond);
+				Console.Clear();
+			}
+		}
+	}
+
+    public class Bullet : IUpdatable
+    {
+		private EnumeratedPool<Soilder> _neighbors;
+		private RenderSkin _skin = new RenderSkin('o',ConsoleColor.DarkGreen);
+		private Vector _position;
+		private Vector _target;
+		private int _damage = 0;
+		private int _speed = 3;
+
+		public bool IsDestroyed => false;
+		
+		public Bullet(Vector position,int damage)
+        {
+			_position = position;
+			_damage = damage;
+        }
 
 
-	public sealed class Damager : Soilder
+		public void TakeEnumaratedPool<T>(EnumeratedPool<T> enumeratedPool) where T : IUpdatable => _neighbors = enumeratedPool as EnumeratedPool<Soilder>;
+		
+		public void Update()
+		{
+			_position.MoveTo(_target,_speed);
+
+            if (_position.GetDistanceTo(_target) < 1)
+            {
+				IsDestroyed = true;
+            }
+		}
+
+		public void Draw()
+        {
+			_skin.Draw(_position);
+        }
+
+    
+    }
+
+    public sealed class Damager : Soilder
     {
 		private int _strength = 5;
-		private int critChance = 1;
+		private Vector _safePlace;
+		private int _speed = 1;
 
-        public override void Update()
+		public Damager()
         {
+			int minStrenght = 5;
+			int MaxStrenght = 15;
 
+			SetSkin(new RenderSkin('#',ConsoleColor.Red));
+
+			_strength = Helper.GetRandomValue(minStrenght,MaxStrenght);
         }
+
+		public override void Update()
+		{
+			SetTarget(SearchNearest(soilder => soilder.CurrentSkin.Color != Skin.Color));
+
+			if (IsValidTarget() == true)
+			{
+				Position.MoveTo(CurrentTarget.CurrentPosition, _speed);
+
+				if (Position.GetDistanceTo(CurrentTarget.CurrentPosition) < 1)
+				{
+					Target.TakeDamage(_strength);
+				}
+
+			}
+		}
 
         public override void Draw()
         {
-           
-        }
-
-
+			Skin.Draw(CurrentPosition);
+		}
     }
 
 	public abstract class Soilder : IUpdatable
 	{
-		private int _health = 100;
-		private int _maxHealth = 100;
-		private Soilder _target;
-		private Vector _position;
 		private EnumeratedPool<Soilder> _neighbors;
-		private Skin _skin;
+		protected int Health = 100;
+		protected int MaxHealth = 100;
+		protected Soilder Target = null;
+		protected Vector Position;
+		protected RenderSkin Skin;
 
+		public int Fraction
+		{
+			get
+			{
+				return (int)Skin.Color;
+			}
+		}
 		public bool IsDead
-        {
-            get
-            {
-				return Health <= 0;
-            }
-        }
+		{
+			get
+			{
+				return CurrentHealth <= 0;
+			}
+		}
 		public bool IsDestroyed => IsDead;
-		public int MaxHealth
-        {
-            get
-            {
-				return _maxHealth;
-            }
+		public int CurrentMaxHealth
+		{
+			get
+			{
+				return MaxHealth;
+			}
 
 			private set
-            {
-				_maxHealth = value;
-            }
-        }
-		public int Health
-        {
-            get
-            {
-				return _health;
-            }
+			{
+				MaxHealth = value;
+			}
+		}
+		public int CurrentHealth
+		{
+			get
+			{
+				return Health;
+			}
 
 			private set
-            {
-				int overHealth = (_health + value);
+			{
+				int overHealth = (Health + value);
 
-				if (overHealth > MaxHealth)
-                {
-					value -= (overHealth - MaxHealth);
-                }
+				if (overHealth > CurrentMaxHealth)
+				{
+					value -= (overHealth - CurrentMaxHealth);
+				}
 				else if (value < 0)
-                {
+				{
 					value = 0;
-                }
+				}
 
-				_health = value;
-            }
-        }
+				Health = value;
+			}
+		}
 		public int Level { get; private set; } = 1;
-		public Vector Position
+		public Vector CurrentPosition
+		{
+			get
+			{
+				return Position;
+			}
+
+            set
+            {
+				Position = value;
+            }
+		}
+		public Soilder CurrentTarget
         {
             get
             {
-				return _position;
+				return Target;
             }
         }
-
+		public RenderSkin CurrentSkin
+        {
+            get
+            {
+				return Skin;
+            }
+        }
 
 		public abstract void Update();
 
@@ -106,28 +235,30 @@ namespace Tired
 		public virtual void LevelUp(int levelCount)
         {
 			SetMaxHealth( (Level - 1) * 25 + 100);
-			SetHealth(MaxHealth);
+			SetHealth(CurrentMaxHealth);
         }
 
-		public void SetSkin(Skin skin) => _skin = skin;
+		public void SetSkin(RenderSkin skin) => Skin = skin;
 
-		public void SetTarget(Soilder soilder) => _target = soilder;
+		public void SetTarget(Soilder soilder) => Target = soilder;
 
-		public void SetPosition(Vector position) => _position = position;
+		public void SetPosition(Vector position) => Position = position;
 
-		public void AddPosition(Vector position) => _position += position;
+		public void AddPosition(Vector position) => Position += position;
 
-		public bool IsValidTarget() => (_target != null && _target.IsDestroyed == false);
+		public bool IsValidTarget() => (Target != null && Target.IsDestroyed == false);
 
-		public void TakeDamage(int damageCount) => Health -= damageCount;
+		public void TakeDamage(int damageCount) => CurrentHealth -= damageCount;
 
-		public void RestoreHealth(int restoreCount) => Health += restoreCount;
+		public void Kill() => Health = 0;
 
-		public int SetHealth(int health) => Health = health;
+		public void RestoreHealth(int restoreCount) => CurrentHealth += restoreCount;
 
-		public int SetMaxHealth(int maxHealth) => MaxHealth = maxHealth;
+		public int SetHealth(int health) => CurrentHealth = health;
 
-		public Soilder SearchNearest()
+		public int SetMaxHealth(int maxHealth) => CurrentMaxHealth = maxHealth;
+
+		public Soilder SearchNearest(Predicate<Soilder> additinalPredicate)
         {
 			int distance = 1000;
 
@@ -135,19 +266,16 @@ namespace Tired
 
 			foreach(Soilder soilder in _neighbors)
             {
-				if(soilder != this && Position.GetDistanceTo(soilder.Position) < distance)
+				if(soilder != this && Position.GetDistanceTo(soilder.CurrentPosition) < distance && additinalPredicate(soilder) == true)
                 {
+					distance = Position.GetDistanceTo(soilder.CurrentPosition);
 					foundSoilder = soilder;
                 }
             }
 
 			return foundSoilder;
         }
-    }
 
-	public class Game
-    {
-		private UpdatablePool<Soilder> _objectPool = new UpdatablePool<Soilder>();
     }
 
 	public class EnumeratedPool<T> : IEnumerable where T : IUpdatable
@@ -199,7 +327,7 @@ namespace Tired
 			_garbageIndexList.Clear();
         }
 
-		private void Update()
+		public void Update()
 		{
 			for (int i = 0; i < _updateablesList.Count; i++)
 			{
@@ -230,37 +358,71 @@ namespace Tired
 
 	public struct Vector
 	{
-		public int X;
-		public int Y; 
+		public int X { get; private set; }
+		public int Y { get; private set; }
 
-		public static Vector operator +(Vector a, Vector b) => new Vector { X = a.X + b.X, Y = a.Y + b.Y };
-		public static Vector operator -(Vector a, Vector b) => new Vector { X = a.X - b.X, Y = a.Y - b.Y };
-
-
-		public int GetLengthSqrt() => (int)Math.Sqrt( (X * X + Y * Y) );
-		public int GetDistanceTo(Vector target) => (target - this).GetLengthSqrt();
-	}
-
-	public struct Skin
-    {
-		private char _symbol;
-		private ConsoleColor _color;
-
-		public Skin(char symbol, ConsoleColor color)
+		public Vector(int x,int y)
         {
-			_color = color;
-			_symbol = symbol;
+			X = x;
+			Y = y;
         }
 
-		public void SetSymbol(char symbol) => _symbol = symbol;
+		public void Set(Vector vector)
+        {
+			X = vector.X;
+			Y = vector.Y;
+        }
 
-		public void SetColor(ConsoleColor color) => _color = color;
+		public static Vector operator +(Vector a, Vector b) => new Vector { X = a.X + b.X, Y = a.Y + b.Y };
 
-		public void Draw(ref Vector position)
+		public static Vector operator -(Vector a, Vector b) => new Vector { X = a.X - b.X, Y = a.Y - b.Y };
+
+		public static Vector operator /(Vector a, Vector b) => new Vector { X = a.X / b.X, Y = a.Y / b.Y };
+
+		public static Vector operator /(Vector a, int b) => new Vector { X = a.X / b, Y = a.Y / b };
+
+		public static Vector operator *(Vector a, int b) => new Vector { X = a.X * b, Y = a.Y * b };
+
+		public int GetLengthSqrt() => (int)Math.Sqrt( (X * X + Y * Y) );
+
+		public int GetDistanceTo(Vector other) => (other - this).GetLengthSqrt();
+
+		public void MoveTo(Vector other, int speed)
+        {
+			Vector differenceVec = (other - this);
+			int sqrtLength = differenceVec.GetLengthSqrt();
+
+			if(sqrtLength == 0)
+            {
+				sqrtLength = 1;
+            }
+
+			Vector normalizedVector = differenceVec / sqrtLength;
+
+			this += normalizedVector * speed;
+        }
+	}
+
+	public struct RenderSkin
+    {
+		public char Symbol { get; private set; }
+		public ConsoleColor Color { get; private set; }
+
+		public RenderSkin(char symbol, ConsoleColor color)
+        {
+			Color = color;
+			Symbol = symbol;
+        }
+
+		public void SetSymbol(char symbol) => Symbol = symbol;
+
+		public void SetColor(ConsoleColor color) => Color = color;
+
+		public void Draw(Vector position)
 		{
-			Console.ForegroundColor = _color;
+			Console.ForegroundColor = Color;
 			Console.SetCursorPosition(position.X, position.Y);
-			Console.Write(_symbol);
+			Console.Write(Symbol);
 			Console.ResetColor();
 		}
 
