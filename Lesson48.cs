@@ -192,7 +192,7 @@ namespace Tired
 				}
 				else if (value < 0)
 				{
-					value = 0;
+					value = 0; 
 				}
 
 				Health = value;
