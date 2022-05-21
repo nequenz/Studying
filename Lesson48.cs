@@ -231,7 +231,7 @@ namespace Tired
 	public struct Vector
 	{
 		public int X;
-		public int Y;
+		public int Y; 
 
 		public static Vector operator +(Vector a, Vector b) => new Vector { X = a.X + b.X, Y = a.Y + b.Y };
 		public static Vector operator -(Vector a, Vector b) => new Vector { X = a.X - b.X, Y = a.Y - b.Y };
