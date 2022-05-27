@@ -263,7 +263,7 @@ namespace Tired
 			}
 		}
 		public bool IsDestroyed => IsDead;
-		public int CurrentMaxHealth 
+		public int CurrentMaxHealth
 		{
 			get
 			{
@@ -536,7 +536,7 @@ namespace Tired
 			}
 		}
     }
-
+ 
 	public interface IUpdatable
     {
 		public bool IsDestroyed { get; }
@@ -551,4 +551,4 @@ namespace Tired
 		public static int GetRandomValue(int minValue = 0, int maxValue = 1) => new Random().Next(minValue,maxValue);
     }
 	
-} 
+}
