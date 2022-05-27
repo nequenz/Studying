@@ -176,7 +176,7 @@ namespace Tired
 
 			if (_currentActionID != _deathActionID)
             {
-				CurrentAge++;
+				CurrentAge++; 
 
 				ChooseRandomAction();
 			}
