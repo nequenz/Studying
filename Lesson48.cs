@@ -4,6 +4,8 @@ using System.Collections.Generic;
 
 namespace Tired
 {
+	public delegate void IUpdatableHandler(IUpdatable updatable);
+
 	public class Program
 	{
 		static void Main(string[] args)
@@ -16,21 +18,32 @@ namespace Tired
 
 	public class Game
 	{
-		private readonly int _updatePerSecond = 100;
-		private UpdatablePool<Soilder> _objectPool = new UpdatablePool<Soilder>();
+		private readonly int _updatePerSecond = 25;
+		private UpdatablePool<IUpdatable> _objectPool = new UpdatablePool<IUpdatable>();
+		private int _blueSoildersCount = 0;
+		private int _redSoildersCount = 0;
 
-		public bool IsOver { get; private set; } = false;
+		public bool IsOver
+        {
+            get
+            {
+				return (_blueSoildersCount==0 || _redSoildersCount==0) ? true : false;
+            }
+        }
 
 		public Game()
         {
-			CreateExamples();
-        }
+			CreateSoilders();
 
-		public void CreateExamples()
+			_objectPool.AddListenerOnDestroyEvent(ListenDestroyedObjects);
+		}
+
+		public void CreateSoilders()
         {
-			int soilderCount = 50;
-			int offsetX = soilderCount / 2;
-			int distanceBeetwen = 4;
+			int soilderCount = 10;
+			float offsetX = soilderCount / 2.0f;
+			float offsetY = 30.0f;
+			float distanceBeetwen = 4.0f;
 
 			for (int i = 0; i < soilderCount; i++)
 			{
@@ -38,17 +51,44 @@ namespace Tired
 
 				if (i < offsetX)
 				{
-					damager.CurrentPosition = new Vector(i * distanceBeetwen, 1);
+					damager.CurrentPosition = new Vector(offsetX+i * distanceBeetwen, 1+i);
 					damager.SetSkin(new RenderSkin('#', ConsoleColor.Red));
 				}
 				else
 				{
-					damager.CurrentPosition = new Vector(i * distanceBeetwen - offsetX * distanceBeetwen, 30);
+					damager.CurrentPosition = new Vector(i * distanceBeetwen + offsetX, offsetY - i);
 					damager.SetSkin(new RenderSkin('#', ConsoleColor.Blue));
 				}
 
-				_objectPool.Add(damager);
+				_objectPool.Create(damager);
 			}
+
+			_blueSoildersCount = soilderCount / 2;
+			_redSoildersCount = soilderCount / 2;
+		}
+
+		public void ListenDestroyedObjects(IUpdatable updatable)
+        {
+			Soilder soilder = updatable as Soilder;
+
+            if (soilder != null)
+            {
+				if(soilder.CurrentSkin.Color == ConsoleColor.Blue)
+                {
+					_blueSoildersCount--;
+                }
+                else if(soilder.CurrentSkin.Color == ConsoleColor.Red)
+                {
+					_redSoildersCount--;
+                }
+            }
+        }
+
+		public void DrawInformation()
+        {
+			Console.SetCursorPosition(0,0);
+			Console.WriteLine("Количество солдат синей армии:" + _blueSoildersCount);
+			Console.WriteLine("Количество солдат красной армии:" + _redSoildersCount);
 		}
 		
 		public void Update()
@@ -56,57 +96,85 @@ namespace Tired
 			while (_objectPool != null && IsOver == false)
 			{
 				_objectPool.Update();
-
+				DrawInformation();
 				System.Threading.Thread.Sleep(_updatePerSecond);
 				Console.Clear();
+			}
+
+			Console.WriteLine("Игра закончена!");
+
+            if (_blueSoildersCount == 0)
+            {
+				Console.WriteLine("Выиграли красные!");
+            }
+            else
+            {
+				Console.WriteLine("Выиграли синие!");
 			}
 		}
 	}
 
     public class Bullet : IUpdatable
     {
-		private EnumeratedPool<Soilder> _neighbors;
+		private EnumeratedPool<IUpdatable> _neighbors;
 		private RenderSkin _skin = new RenderSkin('o',ConsoleColor.DarkGreen);
+		private bool _isDestroyed = false;
 		private Vector _position;
-		private Vector _target;
-		private int _damage = 0;
-		private int _speed = 3;
 
-		public bool IsDestroyed => false;
+		public Soilder SoilderTarget { get; private set; } = null;
+		public Vector Target { get; private set; }
+		public int ShooterFractionColor { get; private set; } = (int)ConsoleColor.White;
+		public int Damage { get; private set; } = 0;
+		public int Speed { get; private set; } = 3;
+		public bool IsDestroyed => _isDestroyed;
 		
-		public Bullet(Vector position,int damage)
+		public Bullet(Vector from,Vector to,int damage, ConsoleColor shooterFractionColor)
         {
-			_position = position;
-			_damage = damage;
+			_position = from;
+			Target = to;
+			Damage = damage;
+			ShooterFractionColor = (int)shooterFractionColor;
         }
 
+		public void Destroy() => _isDestroyed = true;
 
-		public void TakeEnumaratedPool<T>(EnumeratedPool<T> enumeratedPool) where T : IUpdatable => _neighbors = enumeratedPool as EnumeratedPool<Soilder>;
-		
+		public void TakeEnumaratedPool<T>(EnumeratedPool<T> enumeratedPool) where T : IUpdatable 
+			=> _neighbors = enumeratedPool as EnumeratedPool<IUpdatable>;
+
+		public void SetSoilderTarget(Soilder soilder) => SoilderTarget = soilder;
+
 		public void Update()
 		{
-			_position.MoveTo(_target,_speed);
+			float minDistanceToCollision = 2.0f;
 
-            if (_position.GetDistanceTo(_target) < 1)
+			_position.MoveTo(Target, Speed);
+
+            if ( _position.GetDistanceTo(Target) < minDistanceToCollision)
             {
-				IsDestroyed = true;
-            }
+				Destroy();
+
+				if(SoilderTarget != null && _position.GetDistanceTo(SoilderTarget.CurrentPosition) < minDistanceToCollision)
+                {
+					SoilderTarget.TakeDamage(Damage);
+                }
+			}
 		}
 
 		public void Draw()
         {
 			_skin.Draw(_position);
         }
-
-    
     }
 
-    public sealed class Damager : Soilder
+    public class Damager : Soilder
     {
 		private int _strength = 5;
-		private Vector _safePlace;
-		private int _speed = 1;
-
+		private int _reloadTime = 0;
+		private int _maxReloadTime = 20;
+		private float _speed = 0.5f;
+		private float _currentTimeToAvoid = 0.0f;
+		private Vector _safePosition;
+		
 		public Damager()
         {
 			int minStrenght = 5;
@@ -115,22 +183,54 @@ namespace Tired
 			SetSkin(new RenderSkin('#',ConsoleColor.Red));
 
 			_strength = Helper.GetRandomValue(minStrenght,MaxStrenght);
+			_reloadTime = _maxReloadTime/10;
         }
+
+		public void Shoot()
+        {
+			if(Target != null && _reloadTime <=0)
+            {
+				Bullet bullet = new Bullet(Position, Target.CurrentPosition, _strength, Skin.Color);
+
+				bullet.SetSoilderTarget(Target);
+				Neighbors.CreateInstance(bullet);
+
+				_reloadTime = _maxReloadTime;
+			}
+		}
+
+		public void Reload()
+        {
+			if (_reloadTime > 0)
+            {
+				_reloadTime--;
+			}
+		}
+
+		public void Avoid()
+        {
+			int maxBound = 100;
+
+			_currentTimeToAvoid--;
+
+			if (_currentTimeToAvoid <= 0.0f)
+            {
+				_safePosition.Set( new Vector(Helper.GetRandomValue(0, Console.WindowWidth), Helper.GetRandomValue(0, Console.WindowHeight) ) );
+
+				_currentTimeToAvoid = Helper.GetRandomValue(0, maxBound);
+			}
+
+
+			Position.MoveTo(_safePosition, _speed);
+		}
+
 
 		public override void Update()
 		{
-			SetTarget(SearchNearest(soilder => soilder.CurrentSkin.Color != Skin.Color));
-
-			if (IsValidTarget() == true)
-			{
-				Position.MoveTo(CurrentTarget.CurrentPosition, _speed);
-
-				if (Position.GetDistanceTo(CurrentTarget.CurrentPosition) < 1)
-				{
-					Target.TakeDamage(_strength);
-				}
-
-			}
+			SetTarget( SearchNearestSoilder(soilder => soilder.CurrentSkin.Color != Skin.Color) );
+			Reload();
+			Shoot();
+			Avoid();
 		}
 
         public override void Draw()
@@ -141,7 +241,7 @@ namespace Tired
 
 	public abstract class Soilder : IUpdatable
 	{
-		private EnumeratedPool<Soilder> _neighbors;
+		protected EnumeratedPool<IUpdatable> Neighbors;
 		protected int Health = 100;
 		protected int MaxHealth = 100;
 		protected Soilder Target = null;
@@ -192,7 +292,7 @@ namespace Tired
 				}
 				else if (value < 0)
 				{
-					value = 0; 
+					value = 0;
 				}
 
 				Health = value;
@@ -230,7 +330,10 @@ namespace Tired
 
 		public abstract void Draw();
 
-		public void TakeEnumaratedPool<T>(EnumeratedPool<T> enumeratedPool) where T : IUpdatable => _neighbors = enumeratedPool as EnumeratedPool<Soilder>;
+		public void Destroy() => Kill();
+
+		public void TakeEnumaratedPool<T>(EnumeratedPool<T> enumeratedPool) where T : IUpdatable 
+			=> Neighbors = enumeratedPool as EnumeratedPool<IUpdatable>;
 
 		public virtual void LevelUp(int levelCount)
         {
@@ -258,15 +361,22 @@ namespace Tired
 
 		public int SetMaxHealth(int maxHealth) => CurrentMaxHealth = maxHealth;
 
-		public Soilder SearchNearest(Predicate<Soilder> additinalPredicate)
+		public Soilder SearchNearestSoilder(Predicate<Soilder> additinalPredicate)
         {
-			int distance = 1000;
+			float distance = 1000.0f;
 
 			Soilder foundSoilder = null;
 
-			foreach(Soilder soilder in _neighbors)
+			foreach(IUpdatable iupdatable in Neighbors)
             {
-				if(soilder != this && Position.GetDistanceTo(soilder.CurrentPosition) < distance && additinalPredicate(soilder) == true)
+				Soilder soilder = iupdatable as Soilder;
+
+				if(soilder == null)
+                {
+					continue;
+                }
+
+				if (soilder != this && Position.GetDistanceTo(soilder.CurrentPosition) < distance && additinalPredicate(soilder) == true)
                 {
 					distance = Position.GetDistanceTo(soilder.CurrentPosition);
 					foundSoilder = soilder;
@@ -275,7 +385,6 @@ namespace Tired
 
 			return foundSoilder;
         }
-
     }
 
 	public class EnumeratedPool<T> : IEnumerable where T : IUpdatable
@@ -284,9 +393,11 @@ namespace Tired
 
 		public EnumeratedPool(List<T> updatables) => _updateablesList = updatables;
 
+		public void CreateInstance(T instance) => _updateablesList.Add(instance); 
+
 		public List<T> FindAllUpdatableObject(Predicate<T> predicate) => _updateablesList.FindAll(predicate);
 
-		public T FindUpdatableObject(Predicate<T> predicate) => _updateablesList.Find(predicate); 
+		public T FindUpdatableObject(Predicate<T> predicate) => _updateablesList.Find(predicate);
 
 		public T GetUpdatableObjectByIndex(int index)
         {
@@ -296,72 +407,69 @@ namespace Tired
 			return _updateablesList[index];
         }
 
-		public IEnumerator GetEnumerator()
-        {
-			return _updateablesList.GetEnumerator();
-		}
+		public IEnumerator GetEnumerator()=> _updateablesList.GetEnumerator();
 	}
 
 	public class UpdatablePool<T> where T : IUpdatable
 	{
-		private const int GarbageBoundTime = 10000;
-		private readonly List<T> _updateablesList = new List<T>();
 		private readonly EnumeratedPool<T> _protectedPool = null;
+		private readonly List<T> _updatablesList = new List<T>();
 		private readonly List<int> _garbageIndexList = new List<int>();
-		private int _garbageTimer = 0;
+
+		private event IUpdatableHandler _onDestroyEvent;
 
 		public UpdatablePool()
         {
-			_protectedPool = new EnumeratedPool<T>(_updateablesList);
+			_protectedPool = new EnumeratedPool<T>(_updatablesList);
 		}
 
 		public EnumeratedPool<T> GetEnumeratedPool() => _protectedPool;
 
 		private void CollectGarbage()
         {
-			foreach (int index in _garbageIndexList)
+			for(int i = _garbageIndexList.Count-1; i >=0; i--)
             {
-				_updateablesList.RemoveAt(index);
-            }
+				_updatablesList.RemoveAt(_garbageIndexList[i]);
+			}
 
 			_garbageIndexList.Clear();
         }
 
 		public void Update()
 		{
-			for (int i = 0; i < _updateablesList.Count; i++)
+			for (int i = 0; i < _updatablesList.Count; i++)
 			{
-				T updatable = _updateablesList[i];
+				T updatable = _updatablesList[i];
 
-				updatable.TakeEnumaratedPool(_protectedPool);
-				updatable.Update();
-				updatable.Draw();
-
-				if (updatable.IsDestroyed == true)
-				{
+				if(updatable.IsDestroyed == false)
+                {
+					updatable.TakeEnumaratedPool(_protectedPool);
+					updatable.Update();
+					updatable.Draw();
+                }
+                else
+                {
+					_onDestroyEvent?.Invoke(updatable);
 					_garbageIndexList.Add(i);
 				}
 			}
 
-			_garbageTimer++;
-
-			if(_garbageTimer >= GarbageBoundTime)
-            {
-				CollectGarbage();
-
-				_garbageTimer = 0;
-            }
+			CollectGarbage();
 		}
 
-		public void Add(T entity) => _updateablesList.Add(entity);
+		public void Create(T entity) => _updatablesList.Add(entity);
+
+		public void AddListenerOnDestroyEvent(IUpdatableHandler updatableHandler) => _onDestroyEvent += updatableHandler;
+
+		public void RemoveListenerOnDestroyEvent(IUpdatableHandler updatableHandler) => _onDestroyEvent -= updatableHandler;
 	}
 
 	public struct Vector
 	{
-		public int X { get; private set; }
-		public int Y { get; private set; }
+		public float X { get; private set; }
+		public float Y { get; private set; }
 
-		public Vector(int x,int y)
+		public Vector(float x, float y)
         {
 			X = x;
 			Y = y;
@@ -379,26 +487,25 @@ namespace Tired
 
 		public static Vector operator /(Vector a, Vector b) => new Vector { X = a.X / b.X, Y = a.Y / b.Y };
 
-		public static Vector operator /(Vector a, int b) => new Vector { X = a.X / b, Y = a.Y / b };
+		public static Vector operator /(Vector a, float b) => new Vector { X = a.X / b, Y = a.Y / b };
 
-		public static Vector operator *(Vector a, int b) => new Vector { X = a.X * b, Y = a.Y * b };
+		public static Vector operator *(Vector a, float b) => new Vector { X = a.X * b, Y = a.Y * b };
 
-		public int GetLengthSqrt() => (int)Math.Sqrt( (X * X + Y * Y) );
+		public float GetLengthSqrt() => MathF.Sqrt( (X * X + Y * Y) );
 
-		public int GetDistanceTo(Vector other) => (other - this).GetLengthSqrt();
+		public float GetDistanceTo(Vector other) => (other - this).GetLengthSqrt();
 
-		public void MoveTo(Vector other, int speed)
+		public void MoveTo(Vector other, float speed)
         {
 			Vector differenceVec = (other - this);
-			int sqrtLength = differenceVec.GetLengthSqrt();
+			float sqrtLength = differenceVec.GetLengthSqrt();
 
-			if(sqrtLength == 0)
+			if(sqrtLength <= 0.5f)
             {
-				sqrtLength = 1;
+				sqrtLength = 0.5f;
             }
 
 			Vector normalizedVector = differenceVec / sqrtLength;
-
 			this += normalizedVector * speed;
         }
 	}
@@ -420,21 +527,24 @@ namespace Tired
 
 		public void Draw(Vector position)
 		{
-			Console.ForegroundColor = Color;
-			Console.SetCursorPosition(position.X, position.Y);
-			Console.Write(Symbol);
-			Console.ResetColor();
+			if(position.X>=0 && position.Y>= 0)
+            {
+				Console.ForegroundColor = Color;
+				Console.SetCursorPosition((int)position.X, (int)position.Y);
+				Console.Write(Symbol);
+				Console.ResetColor();
+			}
 		}
-
     }
 
 	public interface IUpdatable
     {
 		public bool IsDestroyed { get; }
+		public void Destroy();
 		public void Update();
 		public void Draw();
 		public void TakeEnumaratedPool<T>(EnumeratedPool<T> enumeratedPool) where T : IUpdatable;
-    } 
+    }
 
 	public static class Helper
     {
