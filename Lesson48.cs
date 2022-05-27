@@ -542,7 +542,7 @@ namespace Tired
 		public bool IsDestroyed { get; }
 		public void Destroy();
 		public void Update();
-		public void Draw();
+		public void Draw(); 
 		public void TakeEnumaratedPool<T>(EnumeratedPool<T> enumeratedPool) where T : IUpdatable;
     }
 
