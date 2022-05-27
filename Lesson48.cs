@@ -263,7 +263,7 @@ namespace Tired
 			}
 		}
 		public bool IsDestroyed => IsDead;
-		public int CurrentMaxHealth
+		public int CurrentMaxHealth 
 		{
 			get
 			{
