@@ -59,7 +59,7 @@ namespace Tired
 					damager.CurrentPosition = new Vector(i * distanceBeetwen + offsetX, offsetY - i);
 					damager.SetSkin(new RenderSkin('#', ConsoleColor.Blue));
 				}
-
+ 
 				_objectPool.Create(damager);
 			}
 
