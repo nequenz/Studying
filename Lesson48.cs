@@ -53,18 +53,17 @@ namespace Tired
 				{
 					damager.CurrentPosition = new Vector(offsetX+i * distanceBeetwen, 1+i);
 					damager.SetSkin(new RenderSkin('#', ConsoleColor.Red));
+					_redSoildersCount++;
 				}
 				else
 				{
 					damager.CurrentPosition = new Vector(i * distanceBeetwen + offsetX, offsetY - i);
 					damager.SetSkin(new RenderSkin('#', ConsoleColor.Blue));
+					_blueSoildersCount++;
 				}
 
 				_objectPool.Create(damager);
 			}
-
-			_blueSoildersCount = soilderCount / 2;
-			_redSoildersCount = soilderCount / 2;
 		}
 
 		public void ListenDestroyedObjects(IUpdatable updatable)
@@ -183,7 +182,7 @@ namespace Tired
 			SetSkin(new RenderSkin('#',ConsoleColor.Red));
 
 			_strength = Helper.GetRandomValue(minStrenght,MaxStrenght);
-			_reloadTime = _maxReloadTime/10;
+			_reloadTime = _maxReloadTime;
         }
 
 		public void Shoot()
@@ -337,7 +336,10 @@ namespace Tired
 
 		public virtual void LevelUp(int levelCount)
         {
-			SetMaxHealth( (Level - 1) * 25 + 100);
+			int healthFactorPerLevel = 25;
+			int defaultHealth = 100;
+
+			SetMaxHealth( (Level - 1) * healthFactorPerLevel + defaultHealth);
 			SetHealth(CurrentMaxHealth);
         }
 
