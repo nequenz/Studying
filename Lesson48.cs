@@ -119,7 +119,7 @@ namespace Tired
 		private EnumeratedPool<IUpdatable> _neighbors;
 		private RenderSkin _skin = new RenderSkin('o',ConsoleColor.DarkGreen);
 		private bool _isDestroyed = false;
-		private Vector _position;
+		private Vector _position; 
 
 		public Soilder SoilderTarget { get; private set; } = null;
 		public Vector Target { get; private set; }
