@@ -44,7 +44,7 @@ namespace Tired
             {
 				ShowInfo();
 
-				if(HandleKeys(out ConsoleKey key) == true)
+				if(IsCapturedKey(out ConsoleKey key) == true)
                 {
 					if(key == KeyToAdd)
                     {
@@ -63,7 +63,7 @@ namespace Tired
             }
         }
 
-		public bool HandleKeys(out ConsoleKey outKey)
+		public bool IsCapturedKey(out ConsoleKey outKey)
         {
 			if(Console.KeyAvailable == true)
             {
@@ -176,7 +176,7 @@ namespace Tired
 
 			if (_currentActionID != _deathActionID)
             {
-				CurrentAge++; 
+				CurrentAge++;
 
 				ChooseRandomAction();
 			}
