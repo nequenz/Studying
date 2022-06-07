@@ -11,7 +11,7 @@ namespace Tired
         {
             UserMenu userMenu = new UserMenu();
 
-            userMenu.Update();
+            userMenu.Run();
         }
     }
 
@@ -33,7 +33,7 @@ namespace Tired
             _sortedList = _sickPeople.ToArray();
         }
 
-        public void Update()
+        public void Run()
         {
             string word = "";
 
