@@ -11,7 +11,7 @@ namespace Tired
 
         private static void Main(string[] args)
         {
-            const char startChar = 'Б';
+            const char StartChar = 'Б';
 
             CreateTeam(_teamA);
             CreateTeam(_teamB);
@@ -25,7 +25,7 @@ namespace Tired
             Console.WriteLine("--Команда Б с командой А--");
 
             var team = from Fighter fighter in _teamA
-                       where fighter.Name.StartsWith(startChar)
+                       where fighter.Name.StartsWith(StartChar)
                        select fighter;
 
             var unionTeam = _teamB.Union(team);
@@ -35,8 +35,8 @@ namespace Tired
 
         public static void CreateTeam(List<Fighter> list)
         {
-            const int maxCount = 25;
-            int randomCount = StudyHelper.GetRandomValue(0, maxCount);
+            const int MaxCount = 25;
+            int randomCount = StudyHelper.GetRandomValue(0, MaxCount);
 
             for (int i = 0; i < randomCount; i++)
             {
@@ -66,11 +66,11 @@ namespace Tired
 
         public static string GetRandomName()
         {
-            const int maxChars = 5;
+            const int MaxChars = 5;
 
             string name = "";
 
-            for (int i = 0; i < maxChars; i++)
+            for (int i = 0; i < MaxChars; i++)
             {
                 name += GetRandomRussianChar();
             }
@@ -80,10 +80,10 @@ namespace Tired
 
         public static char GetRandomRussianChar()
         {
-            const int codePageStart = 1040;
-            const int codePageEnd = 1071;
+            const int CodePageStart = 1040;
+            const int CodePageEnd = 1071;
 
-            return (char)GetRandomValue(codePageStart, codePageEnd + 1);
+            return (char)GetRandomValue(CodePageStart, CodePageEnd + 1);
         }
     }
 }
