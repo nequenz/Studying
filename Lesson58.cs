@@ -16,8 +16,8 @@ namespace Tired
 
     public class FightClub
     {
-        private static List<Fighter> _teamA = new List<Fighter>();
-        private static List<Fighter> _teamB = new List<Fighter>();
+        private List<Fighter> _teamA = new List<Fighter>();
+        private List<Fighter> _teamB = new List<Fighter>();
 
         public void UnionTeams()
         {
@@ -35,8 +35,10 @@ namespace Tired
 
             Console.WriteLine("--Команда Б с командой А--");
 
-            _teamB.AddRange(_teamA.Where(conditionToSelect));
-            _teamA.RemoveAll(new Predicate<Fighter>(conditionToSelect));
+            var resultTeam = _teamA.Where(conditionToSelect);
+
+            _teamB = _teamB.Union(resultTeam).ToList();
+            _teamA = _teamA.Except(resultTeam).ToList();
 
             PrintTeam(_teamB);
 
@@ -76,30 +78,15 @@ namespace Tired
 
     public struct CodePage
     {
-        private int _pageStart;
-        private int _pageEnd;
-        private string _name;
-
-        public int PageStart
-        {
-            get => _pageStart;
-        }
-
-        public int PageEnd
-        {
-            get => _pageEnd;
-        }
-
-        public string Name
-        {
-            get => _name;
-        }
+        public int PageStart { get; private set; }
+        public int PageEnd { get; private set; }
+        public string Name { get; private set; }
 
         public CodePage(string name, int start, int end)
         {
-            _name = name;
-            _pageStart = start;
-            _pageEnd = end;
+            Name = name;
+            PageStart = start;
+            PageEnd = end;
         }
     }
 
